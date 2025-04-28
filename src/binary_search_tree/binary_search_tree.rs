@@ -25,13 +25,13 @@ impl<T: Ord> BinarySearchTree<T> {
         *cursor = Some(Box::new(BinaryNode::new(value)));
     }
 
-    pub fn contains(&self, value: T) -> bool {
+    pub fn contains(&self, value: &T) -> bool {
         let mut cursor = &self.root;
 
         while let Some(current_node) = cursor {
-            if current_node.value < value {
+            if current_node.value < *value {
                 cursor = &current_node.right;
-            } else if current_node.value > value {
+            } else if current_node.value > *value {
                 cursor = &current_node.left;
             } else {
                 return true;
@@ -39,6 +39,32 @@ impl<T: Ord> BinarySearchTree<T> {
         }
 
         false
+    }
+
+    pub fn min(&self) -> Option<&T> {
+        let mut cursor = &self.root;
+
+        while let Some(current_node) = cursor {
+            if current_node.left.is_some() {
+                cursor = &current_node.left;
+            } else {
+                return Some(&current_node.value);
+            }
+        }
+        None
+    }
+
+    pub fn max(&self) -> Option<&T> {
+        let mut cursor = &self.root;
+
+        while let Some(current_node) = cursor {
+            if current_node.right.is_some() {
+                cursor = &current_node.right;
+            } else {
+                return Some(&current_node.value);
+            }
+        }
+        None
     }
 }
 
@@ -52,20 +78,42 @@ mod tests {
         let mut bst = BinarySearchTree::new();
 
         // Act
-        bst.insert(5);
-        bst.insert(10);
-        bst.insert(5);
-        bst.insert(6);
-        bst.insert(4);
-        bst.insert(100);
-        bst.insert(3);
+        let values = vec![5, 10, 6, 10, 4, 100, 3];
+        for value in &values {
+            bst.insert(value);
+        }
 
         // Assert
-        assert_eq!(bst.contains(5), true);
-        assert_eq!(bst.contains(10), true);
-        assert_eq!(bst.contains(6), true);
-        assert_eq!(bst.contains(4), true);
-        assert_eq!(bst.contains(100), true);
-        assert_eq!(bst.contains(3), true);
+        for value in &values {
+            assert!(bst.contains(&value));
+        }
+    }
+
+    #[test]
+    fn min_basic() {
+        let mut bst = BinarySearchTree::new();
+
+        // Act
+        let values = vec![5, 10, 3, 10, 4, 100, 6, 9];
+        for value in &values {
+            bst.insert(value);
+        }
+
+        // Assert
+        assert_eq!(bst.min(), Some(&3).as_ref());
+    }
+
+    #[test]
+    fn max_basic() {
+        let mut bst = BinarySearchTree::new();
+
+        // Act
+        let values = vec![5, 10, 6, 100, 4, 10, 3, 31, 1];
+        for value in &values {
+            bst.insert(value);
+        }
+
+        // Assert
+        assert_eq!(bst.max(), Some(&100).as_ref());
     }
 }
