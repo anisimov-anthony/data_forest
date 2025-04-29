@@ -112,79 +112,243 @@ impl<T: Ord> BinarySearchTree<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rand::seq::SliceRandom;
-    use rand::thread_rng;
 
     #[test]
-    fn insert_contains_basic() {
-        // Arrange
-        let mut bst = BinarySearchTree::new();
+    fn contains_in_empty_tree() {
+        let bst = BinarySearchTree::<i32>::new();
 
-        // Act
-        let values = vec![5, 10, 6, 10, 4, 100, 3];
-        for value in &values {
-            bst.insert(value);
+        assert!(!bst.contains(&0));
+    }
+
+    #[test]
+    fn contains_in_single_node_tree() {
+        let mut bst = BinarySearchTree::new();
+        bst.insert(1);
+
+        assert!(bst.contains(&1));
+    }
+
+    #[test]
+    fn contains_in_degenerate_trees() {
+        let mut bst_degenerate_right = BinarySearchTree::new();
+        let mut bst_degenerate_left = BinarySearchTree::new();
+
+        for i in 0..=10 {
+            bst_degenerate_right.insert(i);
+        }
+        for i in (0..=10).rev() {
+            bst_degenerate_left.insert(i);
         }
 
-        // Assert
-        for value in &values {
-            assert!(bst.contains(&value));
+        for i in 0..=10 {
+            assert!(bst_degenerate_right.contains(&i));
+            assert!(bst_degenerate_left.contains(&i));
+        }
+    }
+
+    #[test]
+    fn contains_basic() {
+        let mut bst_diff_heights_null = BinarySearchTree::new();
+        let mut bst_diff_heights_one = BinarySearchTree::new();
+        let mut bst_diff_heights_two = BinarySearchTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        for value in &values_1 {
+            bst_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            bst_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            bst_diff_heights_two.insert(value);
+        }
+
+        for value in &values_1 {
+            assert!(bst_diff_heights_null.contains(&value));
+        }
+        for value in &values_2 {
+            assert!(bst_diff_heights_one.contains(&value));
+        }
+        for value in &values_3 {
+            assert!(bst_diff_heights_two.contains(&value));
+        }
+    }
+
+    #[test]
+    fn remove_from_empty_tree() {
+        let mut bst = BinarySearchTree::<i32>::new();
+
+        bst.remove(&42);
+
+        assert!(!bst.contains(&42));
+        assert_eq!(bst.min(), None);
+        assert_eq!(bst.max(), None);
+    }
+
+    #[test]
+    fn remove_from_single_node_tree() {
+        let mut bst = BinarySearchTree::new();
+        bst.insert(1);
+        bst.remove(&1);
+
+        assert!(!bst.contains(&1));
+    }
+
+    #[test]
+    fn remove_from_degenerate_trees() {
+        let mut bst_degenerate_right = BinarySearchTree::new();
+        let mut bst_degenerate_left = BinarySearchTree::new();
+
+        for i in 0..=10 {
+            bst_degenerate_right.insert(i);
+        }
+        for i in (0..=10).rev() {
+            bst_degenerate_left.insert(i);
+        }
+
+        for i in 0..=10 {
+            bst_degenerate_right.remove(&i);
+            bst_degenerate_left.remove(&i);
+            assert!(!bst_degenerate_right.contains(&i));
+            assert!(!bst_degenerate_left.contains(&i));
         }
     }
 
     #[test]
     fn remove_basic() {
-        // Arrange
-        let mut bst = BinarySearchTree::new();
-        let mut values = vec![
-            8, 3, 10, 1, 6, 14, 4, 7, 13, 11, 23, 1, 9, -99, 7, 32, 67, 5, 2, 17,
-        ];
-        let mut rng = thread_rng();
-        values.shuffle(&mut rng);
+        let mut bst_diff_heights_null = BinarySearchTree::new();
+        let mut bst_diff_heights_one = BinarySearchTree::new();
+        let mut bst_diff_heights_two = BinarySearchTree::new();
 
-        for value in &values {
-            bst.insert(*value);
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        for value in &values_1 {
+            bst_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            bst_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            bst_diff_heights_two.insert(value);
         }
 
-        for value in &values {
-            assert!(bst.contains(value));
+        for value in &values_1 {
+            bst_diff_heights_null.remove(&value);
+            assert!(!bst_diff_heights_null.contains(&value));
+        }
+        for value in &values_2 {
+            bst_diff_heights_one.remove(&value);
+            assert!(!bst_diff_heights_one.contains(&value));
+        }
+        for value in &values_3 {
+            bst_diff_heights_two.remove(&value);
+            assert!(!bst_diff_heights_two.contains(&value));
+        }
+    }
+
+    #[test]
+    fn min_in_empty_tree() {
+        let bst = BinarySearchTree::<i32>::new();
+
+        assert_eq!(bst.min(), None);
+    }
+
+    #[test]
+    fn min_in_degenerate_trees() {
+        let mut bst_degenerate_right = BinarySearchTree::new();
+        let mut bst_degenerate_left = BinarySearchTree::new();
+
+        for i in 0..=10 {
+            bst_degenerate_right.insert(i);
+        }
+        for i in (0..=10).rev() {
+            bst_degenerate_left.insert(i);
         }
 
-        let mut rng = thread_rng();
-        values.shuffle(&mut rng);
-
-        // Act & Assert
-        for value in &values {
-            bst.remove(value);
-            assert!(!bst.contains(value));
-        }
+        assert_eq!(bst_degenerate_right.min(), Some(&0));
+        assert_eq!(bst_degenerate_left.min(), Some(&0));
     }
 
     #[test]
     fn min_basic() {
-        let mut bst = BinarySearchTree::new();
+        let mut bst_diff_heights_null = BinarySearchTree::new();
+        let mut bst_diff_heights_one = BinarySearchTree::new();
+        let mut bst_diff_heights_two = BinarySearchTree::new();
 
-        // Act
-        let values = vec![5, 10, 3, 10, 4, 100, 6, 9];
-        for value in &values {
-            bst.insert(value);
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+
+        for value in &values_1 {
+            bst_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            bst_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            bst_diff_heights_two.insert(value);
         }
 
-        // Assert
-        assert_eq!(bst.min(), Some(&3).as_ref());
+        assert_eq!(bst_diff_heights_null.min(), values_1.iter().min().as_ref());
+        assert_eq!(bst_diff_heights_one.min(), values_2.iter().min().as_ref());
+        assert_eq!(bst_diff_heights_two.min(), values_3.iter().min().as_ref());
+    }
+
+    #[test]
+    fn max_in_empty_tree() {
+        let bst = BinarySearchTree::<i32>::new();
+
+        assert_eq!(bst.max(), None);
+    }
+
+    #[test]
+    fn max_in_degenerate_trees() {
+        let mut bst_degenerate_right = BinarySearchTree::new();
+        let mut bst_degenerate_left = BinarySearchTree::new();
+
+        for i in 0..=10 {
+            bst_degenerate_right.insert(i);
+        }
+        for i in (0..=10).rev() {
+            bst_degenerate_left.insert(i);
+        }
+
+        assert_eq!(bst_degenerate_right.max(), Some(&10));
+        assert_eq!(bst_degenerate_left.max(), Some(&10));
     }
 
     #[test]
     fn max_basic() {
-        let mut bst = BinarySearchTree::new();
+        let mut bst_diff_heights_null = BinarySearchTree::new();
+        let mut bst_diff_heights_one = BinarySearchTree::new();
+        let mut bst_diff_heights_two = BinarySearchTree::new();
 
-        // Act
-        let values = vec![5, 10, 6, 100, 4, 10, 3, 31, 1];
-        for value in &values {
-            bst.insert(value);
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        for value in &values_1 {
+            bst_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            bst_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            bst_diff_heights_two.insert(value);
         }
 
-        // Assert
-        assert_eq!(bst.max(), Some(&100).as_ref());
+        assert_eq!(bst_diff_heights_null.max(), values_1.iter().max().as_ref());
+        assert_eq!(bst_diff_heights_one.max(), values_2.iter().max().as_ref());
+        assert_eq!(bst_diff_heights_two.max(), values_3.iter().max().as_ref());
+    }
+
+    #[test]
+    fn max_min_are_similar_for_single_element_tree() {
+        let mut bst = BinarySearchTree::new();
+        bst.insert(1);
+
+        assert!(bst.min() == bst.max() && bst.min() == Some(&1));
     }
 }
