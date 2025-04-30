@@ -112,6 +112,7 @@ impl<T: Ord> BinarySearchTree<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use proptest::prelude::*;
 
     #[test]
     fn contains_in_empty_tree() {
@@ -173,6 +174,25 @@ mod tests {
         }
         for value in &values_3 {
             assert!(bst_diff_heights_two.contains(&value));
+        }
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 1000,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_insert_contains(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+            let mut bst = BinarySearchTree::new();
+
+            for &v in &values {
+                bst.insert(v);
+            }
+
+            for &v in &values {
+                assert!(bst.contains(&v));
+            }
         }
     }
 
@@ -249,6 +269,33 @@ mod tests {
         }
     }
 
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 1000,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_remove(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+            let mut bst = BinarySearchTree::new();
+
+            for &v in &values {
+                bst.insert(v);
+            }
+
+            for &v in &values {
+                assert!(bst.contains(&v));
+            }
+
+            for &v in &values {
+                bst.remove(&v);
+            }
+
+            for &v in &values {
+                assert!(!bst.contains(&v));
+            }
+        }
+    }
+
     #[test]
     fn min_in_empty_tree() {
         let bst = BinarySearchTree::<i32>::new();
@@ -295,6 +342,23 @@ mod tests {
         assert_eq!(bst_diff_heights_null.min(), values_1.iter().min().as_ref());
         assert_eq!(bst_diff_heights_one.min(), values_2.iter().min().as_ref());
         assert_eq!(bst_diff_heights_two.min(), values_3.iter().min().as_ref());
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 1000,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_min(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+            let mut bst = BinarySearchTree::new();
+
+            for &v in &values {
+                bst.insert(v);
+            }
+
+            assert_eq!(bst.min(), values.iter().min());
+        }
     }
 
     #[test]
@@ -344,11 +408,42 @@ mod tests {
         assert_eq!(bst_diff_heights_two.max(), values_3.iter().max().as_ref());
     }
 
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 1000,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_max(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+            let mut bst = BinarySearchTree::new();
+
+            for &v in &values {
+                bst.insert(v);
+            }
+
+            assert_eq!(bst.max(), values.iter().max());
+        }
+    }
+
     #[test]
     fn max_min_are_similar_for_single_element_tree() {
         let mut bst = BinarySearchTree::new();
         bst.insert(1);
 
         assert!(bst.min() == bst.max() && bst.min() == Some(&1));
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 1000,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_max_min_are_similar_for_single_element_tree(value in any::<i32>()) {
+            let mut bst = BinarySearchTree::new();
+            bst.insert(value);
+
+            assert!(bst.min() == bst.max() && bst.min() == Some(&value));
+        }
     }
 }
