@@ -1,5 +1,6 @@
 use super::node::BinaryNode;
 use std::cmp::Ordering;
+use std::collections::VecDeque;
 
 pub struct BinarySearchTree<T: Ord> {
     pub root: Option<Box<BinaryNode<T>>>,
@@ -140,6 +141,58 @@ impl<T: Ord> BinarySearchTree<T> {
             if let Some(node) = stack.pop() {
                 result.push(&node.value);
                 current = &node.right;
+            }
+        }
+
+        result
+    }
+
+    pub fn post_order(&self) -> Vec<&T> {
+        let mut result = Vec::new();
+        let mut stack = Vec::new();
+        let mut current = &self.root;
+        let mut last_visited: Option<&Box<BinaryNode<T>>> = None;
+
+        while !stack.is_empty() || current.is_some() {
+            while let Some(node) = current {
+                stack.push(node);
+                current = &node.left;
+            }
+
+            if let Some(node) = stack.last() {
+                let right_visited = match (&node.right, last_visited) {
+                    (Some(right), Some(last)) => std::ptr::eq(right.as_ref(), last.as_ref()),
+                    _ => false,
+                };
+
+                if node.right.is_none() || right_visited {
+                    result.push(&node.value);
+                    last_visited = stack.pop();
+                } else {
+                    current = &node.right;
+                }
+            }
+        }
+
+        result
+    }
+
+    pub fn level_order(&self) -> Vec<&T> {
+        let mut result = Vec::new();
+        let mut queue = VecDeque::new();
+
+        if let Some(root) = &self.root {
+            queue.push_back(root);
+        }
+
+        while let Some(node) = queue.pop_front() {
+            result.push(&node.value);
+
+            if let Some(left) = &node.left {
+                queue.push_back(left);
+            }
+            if let Some(right) = &node.right {
+                queue.push_back(right);
             }
         }
 
@@ -657,6 +710,172 @@ mod tests {
     }
 
     #[test]
+    fn post_order_in_empty_tree() {
+        let bst = BinarySearchTree::<i32>::new();
+
+        assert_eq!(bst.post_order(), Vec::<&i32>::new());
+    }
+
+    #[test]
+    fn post_order_in_degenerate_trees() {
+        let mut bst_degenerate_right = BinarySearchTree::new();
+        let mut bst_degenerate_left = BinarySearchTree::new();
+
+        for i in 0..=10 {
+            bst_degenerate_right.insert(i);
+        }
+        for i in (0..=10).rev() {
+            bst_degenerate_left.insert(i);
+        }
+
+        assert_eq!(
+            bst_degenerate_right.post_order(),
+            vec![&10, &9, &8, &7, &6, &5, &4, &3, &2, &1, &0]
+        );
+        assert_eq!(
+            bst_degenerate_left.post_order(),
+            vec![&0, &1, &2, &3, &4, &5, &6, &7, &8, &9, &10]
+        );
+    }
+
+    #[test]
+    fn post_order_basic() {
+        let mut bst_diff_heights_null = BinarySearchTree::new();
+        let mut bst_diff_heights_one = BinarySearchTree::new();
+        let mut bst_diff_heights_two = BinarySearchTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        for value in &values_1 {
+            bst_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            bst_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            bst_diff_heights_two.insert(value);
+        }
+
+        assert_eq!(
+            bst_diff_heights_null.post_order(),
+            vec![&&2, &&4, &&3, &&6, &&8, &&7, &&5]
+        );
+
+        assert_eq!(
+            bst_diff_heights_one.post_order(),
+            vec![&&1, &&3, &&2, &&5, &&6, &&4]
+        );
+
+        assert_eq!(
+            bst_diff_heights_two.post_order(),
+            vec![&&1, &&2, &&7, &&6, &&4, &&10, &&14, &&12, &&8]
+        );
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 1000,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_post_order(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+            let mut bst = BinarySearchTree::new();
+            let mut bst_comparing = IterativeBSTOther::new();
+
+            for &v in &values {
+                bst.insert(v);
+                bst_comparing.insert(v);
+            }
+
+            assert_eq!(bst.post_order(), bst_comparing.post_order_vec());
+        }
+    }
+
+    #[test]
+    fn level_order_in_empty_tree() {
+        let bst = BinarySearchTree::<i32>::new();
+
+        assert_eq!(bst.level_order(), Vec::<&i32>::new());
+    }
+
+    #[test]
+    fn level_order_in_degenerate_trees() {
+        let mut bst_degenerate_right = BinarySearchTree::new();
+        let mut bst_degenerate_left = BinarySearchTree::new();
+
+        for i in 0..=10 {
+            bst_degenerate_right.insert(i);
+        }
+        for i in (0..=10).rev() {
+            bst_degenerate_left.insert(i);
+        }
+
+        assert_eq!(
+            bst_degenerate_right.level_order(),
+            vec![&0, &1, &2, &3, &4, &5, &6, &7, &8, &9, &10]
+        );
+        assert_eq!(
+            bst_degenerate_left.level_order(),
+            vec![&10, &9, &8, &7, &6, &5, &4, &3, &2, &1, &0]
+        );
+    }
+
+    #[test]
+    fn level_order_basic() {
+        let mut bst_diff_heights_null = BinarySearchTree::new();
+        let mut bst_diff_heights_one = BinarySearchTree::new();
+        let mut bst_diff_heights_two = BinarySearchTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        for value in &values_1 {
+            bst_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            bst_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            bst_diff_heights_two.insert(value);
+        }
+
+        assert_eq!(
+            bst_diff_heights_null.level_order(),
+            vec![&&5, &&3, &&7, &&2, &&4, &&6, &&8]
+        );
+
+        assert_eq!(
+            bst_diff_heights_one.level_order(),
+            vec![&&4, &&2, &&6, &&1, &&3, &&5]
+        );
+
+        assert_eq!(
+            bst_diff_heights_two.level_order(),
+            vec![&&8, &&4, &&12, &&2, &&6, &&10, &&14, &&1, &&7]
+        );
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 1000,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_level_order(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+            let mut bst = BinarySearchTree::new();
+            let mut bst_comparing = IterativeBSTOther::new();
+
+            for &v in &values {
+                bst.insert(v);
+                bst_comparing.insert(v);
+            }
+
+            assert_eq!(bst.level_order(), bst_comparing.level_order_vec());
+        }
+    }
+
+    #[test]
     fn number_of_elements_in_empty_tree() {
         let bst = BinarySearchTree::<i32>::new();
 
@@ -716,7 +935,7 @@ mod tests {
                 bst.insert(v);
             }
 
-            assert_eq!(bst.number_of_elements(), values.len());
+            assert_eq!(bst.number_of_elements(), values.iter().collect::<std::collections::HashSet<_>>().len());
         }
     }
 }
