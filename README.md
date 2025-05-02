@@ -1,7 +1,7 @@
 # 🌳 Data Forest
 [![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange)](https://www.rust-lang.org) 
 [![CI](https://github.com/anisimov-anthony/data_forest/actions/workflows/rust.yml/badge.svg)](https://github.com/anisimov-anthony/data_forest/actions)
-[![Codecov](https://codecov.io/github/anisimov-anthony/data_forest/coverage.svg?branch=master)](https://codecov.io/gh/anisimov-anthony/data_forest)
+[![codecov](https://codecov.io/gh/anisimov-anthony/data_forest/branch/master/graph/badge.svg?token=NEBBSV6XXK)](https://codecov.io/gh/anisimov-anthony/data_forest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
 
 **Rust Implementation of Tree Data Structures**
