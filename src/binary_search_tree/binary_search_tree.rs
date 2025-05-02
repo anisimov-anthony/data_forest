@@ -109,6 +109,40 @@ impl<T: Ord> BinarySearchTree<T> {
         None
     }
 
+    pub fn height(&self) -> usize {
+        if self.root.is_none() {
+            return 0;
+        }
+
+        let mut height = 0;
+        let mut queue = VecDeque::new();
+
+        if let Some(root) = &self.root {
+            queue.push_back(root);
+        }
+
+        while !queue.is_empty() {
+            let level_size = queue.len();
+
+            for _ in 0..level_size {
+                let node = queue.pop_front().unwrap();
+
+                if let Some(left) = &node.left {
+                    queue.push_back(left);
+                }
+                if let Some(right) = &node.right {
+                    queue.push_back(right);
+                }
+            }
+
+            if !queue.is_empty() {
+                height += 1;
+            }
+        }
+
+        height
+    }
+
     pub fn pre_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -540,6 +574,76 @@ mod tests {
             bst.insert(value);
 
             assert!(bst.min() == bst.max() && bst.min() == Some(&value));
+        }
+    }
+
+    #[test]
+    fn height_in_empty_tree() {
+        let bst = BinarySearchTree::<i32>::new();
+
+        assert_eq!(bst.height(), 0);
+    }
+
+    #[test]
+    fn height_in_degenerate_trees() {
+        let mut bst_degenerate_right = BinarySearchTree::new();
+        let mut bst_degenerate_left = BinarySearchTree::new();
+
+        for i in 0..=10 {
+            bst_degenerate_right.insert(i);
+        }
+        for i in (0..=10).rev() {
+            bst_degenerate_left.insert(i);
+        }
+
+        assert_eq!(bst_degenerate_right.height(), 10);
+        assert_eq!(bst_degenerate_left.height(), 10);
+    }
+
+    #[test]
+    fn height_basic() {
+        let mut bst_diff_heights_null = BinarySearchTree::new();
+        let mut bst_diff_heights_one = BinarySearchTree::new();
+        let mut bst_diff_heights_two = BinarySearchTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        for value in &values_1 {
+            bst_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            bst_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            bst_diff_heights_two.insert(value);
+        }
+
+        assert_eq!(bst_diff_heights_null.height(), 2);
+        assert_eq!(bst_diff_heights_one.height(), 2);
+        assert_eq!(bst_diff_heights_two.height(), 3);
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 1000,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_height(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+            let mut bst = BinarySearchTree::new();
+            let mut bst_comparing = IterativeBSTOther::new();
+
+            for &v in &values {
+                bst.insert(v);
+                bst_comparing.insert(v);
+            }
+
+            if values.is_empty() {
+                assert_eq!(bst.height(), 0);
+            } else {
+                assert_eq!(bst.height(), bst_comparing.height().unwrap_or(0) as usize);
+            }
         }
     }
 
