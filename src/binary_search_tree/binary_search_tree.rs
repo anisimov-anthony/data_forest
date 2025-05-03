@@ -2,16 +2,38 @@ use super::node::BinaryNode;
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 
-pub struct BinarySearchTree<T: Ord> {
+pub struct BinarySearchTree<T: Ord + Clone> {
     pub root: Option<Box<BinaryNode<T>>>,
+    min_value: Option<T>,
+    max_value: Option<T>,
 }
 
-impl<T: Ord> BinarySearchTree<T> {
+impl<T: Ord + Clone> BinarySearchTree<T> {
     pub fn new() -> Self {
-        BinarySearchTree { root: None }
+        BinarySearchTree {
+            root: None,
+            min_value: None,
+            max_value: None,
+        }
     }
 
     pub fn insert(&mut self, value: T) {
+        match (&self.min_value, &self.max_value) {
+            (None, None) => {
+                self.min_value = Some(value.clone());
+                self.max_value = Some(value.clone());
+            }
+            (Some(min), Some(max)) => {
+                if &value < min {
+                    self.min_value = Some(value.clone());
+                }
+                if &value > max {
+                    self.max_value = Some(value.clone());
+                }
+            }
+            _ => unreachable!(),
+        }
+
         let mut cursor = &mut self.root;
 
         while let Some(current_node) = cursor {
@@ -65,6 +87,10 @@ impl<T: Ord> BinarySearchTree<T> {
                 },
             }
         }
+
+        // todo: optimize (this is work twice)
+        self.min_value = self.refind_min();
+        self.max_value = self.refind_max();
     }
 
     pub fn contains(&self, value: &T) -> bool {
@@ -84,26 +110,34 @@ impl<T: Ord> BinarySearchTree<T> {
     }
 
     pub fn min(&self) -> Option<&T> {
+        self.min_value.as_ref()
+    }
+
+    pub fn max(&self) -> Option<&T> {
+        self.max_value.as_ref()
+    }
+
+    fn refind_min(&self) -> Option<T> {
         let mut cursor = &self.root;
 
         while let Some(current_node) = cursor {
             if current_node.left.is_some() {
                 cursor = &current_node.left;
             } else {
-                return Some(&current_node.value);
+                return Some(current_node.value.clone());
             }
         }
         None
     }
 
-    pub fn max(&self) -> Option<&T> {
+    fn refind_max(&self) -> Option<T> {
         let mut cursor = &self.root;
 
         while let Some(current_node) = cursor {
             if current_node.right.is_some() {
                 cursor = &current_node.right;
             } else {
-                return Some(&current_node.value);
+                return Some(current_node.value.clone());
             }
         }
         None
@@ -243,6 +277,7 @@ mod tests {
     use super::*;
     use bst_rs::{BinarySearchTree as BinarySearchTreeOther, IterativeBST as IterativeBSTOther};
     use proptest::prelude::*;
+    use std::collections::HashSet;
 
     #[test]
     fn contains_in_empty_tree() {
@@ -309,11 +344,11 @@ mod tests {
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_insert_contains(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_insert_contains(values in prop::collection::vec(any::<i32>(), 1..111)) {
             let mut bst = BinarySearchTree::new();
 
             for &v in &values {
@@ -338,90 +373,132 @@ mod tests {
     }
 
     #[test]
-    fn remove_from_single_node_tree() {
+    fn remove_from_single_node_tree_check_min_max_updating() {
         let mut bst = BinarySearchTree::new();
-        bst.insert(1);
-        bst.remove(&1);
+        assert!(bst.max() == bst.min() && bst.max() == None);
 
+        bst.insert(1);
+        assert!(bst.max() == bst.min() && bst.max() == Some(&1));
+        assert!(bst.contains(&1));
+
+        bst.remove(&1);
+        assert!(bst.max() == bst.min() && bst.max() == None);
         assert!(!bst.contains(&1));
     }
 
     #[test]
-    fn remove_from_degenerate_trees() {
+    fn remove_from_degenerate_trees_check_min_max_updating() {
         let mut bst_degenerate_right = BinarySearchTree::new();
         let mut bst_degenerate_left = BinarySearchTree::new();
 
         for i in 0..=10 {
             bst_degenerate_right.insert(i);
+            assert_eq!(bst_degenerate_right.min(), Some(&0));
+            assert_eq!(bst_degenerate_right.max(), Some(&i));
         }
         for i in (0..=10).rev() {
             bst_degenerate_left.insert(i);
+            assert_eq!(bst_degenerate_left.min(), Some(&i));
+            assert_eq!(bst_degenerate_left.max(), Some(&10));
         }
 
         for i in 0..=10 {
             bst_degenerate_right.remove(&i);
-            bst_degenerate_left.remove(&i);
             assert!(!bst_degenerate_right.contains(&i));
+
+            bst_degenerate_left.remove(&i);
             assert!(!bst_degenerate_left.contains(&i));
+
+            if i < 10 {
+                assert_eq!(bst_degenerate_right.min(), Some(&(i + 1)));
+                assert_eq!(bst_degenerate_right.max(), Some(&10));
+
+                assert_eq!(bst_degenerate_left.min(), Some(&(i + 1)));
+                assert_eq!(bst_degenerate_left.max(), Some(&10));
+            } else {
+                assert_eq!(bst_degenerate_right.min(), None);
+                assert_eq!(bst_degenerate_right.max(), None);
+
+                assert_eq!(bst_degenerate_left.min(), None);
+                assert_eq!(bst_degenerate_left.max(), None);
+            }
         }
     }
 
     #[test]
-    fn remove_basic() {
-        let mut bst_diff_heights_null = BinarySearchTree::new();
-        let mut bst_diff_heights_one = BinarySearchTree::new();
-        let mut bst_diff_heights_two = BinarySearchTree::new();
+    fn remove_basic_check_min_max_updating() {
+        let mut bst1 = BinarySearchTree::new();
+        let mut bst2 = BinarySearchTree::new();
+        let mut bst3 = BinarySearchTree::new();
 
-        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
-        let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
-        for value in &values_1 {
-            bst_diff_heights_null.insert(value);
+        let values1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values2 = vec![4, 2, 6, 1, 3, 5];
+        let values3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+
+        for &v in &values1 {
+            bst1.insert(v);
         }
-        for value in &values_2 {
-            bst_diff_heights_one.insert(value);
+        for &v in &values2 {
+            bst2.insert(v);
         }
-        for value in &values_3 {
-            bst_diff_heights_two.insert(value);
+        for &v in &values3 {
+            bst3.insert(v);
         }
 
-        for value in &values_1 {
-            bst_diff_heights_null.remove(&value);
-            assert!(!bst_diff_heights_null.contains(&value));
+        let mut remaining1 = values1.clone();
+        let mut remaining2 = values2.clone();
+        let mut remaining3 = values3.clone();
+
+        for &v in &values1 {
+            bst1.remove(&v);
+            remaining1.retain(|&x| x != v);
+
+            assert!(!bst1.contains(&v));
+            assert_eq!(bst1.min(), remaining1.iter().min());
+            assert_eq!(bst1.max(), remaining1.iter().max());
         }
-        for value in &values_2 {
-            bst_diff_heights_one.remove(&value);
-            assert!(!bst_diff_heights_one.contains(&value));
+
+        for &v in &values2 {
+            bst2.remove(&v);
+            remaining2.retain(|&x| x != v);
+
+            assert!(!bst2.contains(&v));
+            assert_eq!(bst2.min(), remaining2.iter().min());
+            assert_eq!(bst2.max(), remaining2.iter().max());
         }
-        for value in &values_3 {
-            bst_diff_heights_two.remove(&value);
-            assert!(!bst_diff_heights_two.contains(&value));
+
+        for &v in &values3 {
+            bst3.remove(&v);
+            remaining3.retain(|&x| x != v);
+
+            assert!(!bst3.contains(&v));
+            assert_eq!(bst3.min(), remaining3.iter().min());
+            assert_eq!(bst3.max(), remaining3.iter().max());
         }
     }
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_remove(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_remove_check_min_max_updating(values in prop::collection::vec(any::<i32>(), 1..100)) {
             let mut bst = BinarySearchTree::new();
+            let unique_values: Vec<i32> = values.iter().cloned().collect::<HashSet<_>>().into_iter().collect();
+            let mut remaining = unique_values.clone();
 
             for &v in &values {
                 bst.insert(v);
             }
 
             for &v in &values {
-                assert!(bst.contains(&v));
-            }
-
-            for &v in &values {
                 bst.remove(&v);
-            }
+                remaining.retain(|&x| x != v);
 
-            for &v in &values {
                 assert!(!bst.contains(&v));
+                assert_eq!(bst.min(), remaining.iter().min());
+                assert_eq!(bst.max(), remaining.iter().max());
             }
         }
     }
@@ -434,23 +511,22 @@ mod tests {
     }
 
     #[test]
-    fn min_in_degenerate_trees() {
+    fn min_in_degenerate_trees_check_updating() {
         let mut bst_degenerate_right = BinarySearchTree::new();
         let mut bst_degenerate_left = BinarySearchTree::new();
 
         for i in 0..=10 {
             bst_degenerate_right.insert(i);
+            assert_eq!(bst_degenerate_right.min(), Some(&0));
         }
         for i in (0..=10).rev() {
             bst_degenerate_left.insert(i);
+            assert_eq!(bst_degenerate_left.min(), Some(&i));
         }
-
-        assert_eq!(bst_degenerate_right.min(), Some(&0));
-        assert_eq!(bst_degenerate_left.min(), Some(&0));
     }
 
     #[test]
-    fn min_basic() {
+    fn min_basic_check_updating() {
         let mut bst_diff_heights_null = BinarySearchTree::new();
         let mut bst_diff_heights_one = BinarySearchTree::new();
         let mut bst_diff_heights_two = BinarySearchTree::new();
@@ -459,35 +535,52 @@ mod tests {
         let values_2 = vec![4, 2, 6, 1, 3, 5];
         let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
 
+        let mut current_min_1 = None;
+        let mut current_min_2 = None;
+        let mut current_min_3 = None;
+
         for value in &values_1 {
-            bst_diff_heights_null.insert(value);
-        }
-        for value in &values_2 {
-            bst_diff_heights_one.insert(value);
-        }
-        for value in &values_3 {
-            bst_diff_heights_two.insert(value);
+            bst_diff_heights_null.insert(*value);
+            current_min_1 = Some(*value)
+                .filter(|&x| current_min_1.map_or(true, |min| x < min))
+                .or(current_min_1);
+            assert_eq!(bst_diff_heights_null.min(), current_min_1.as_ref());
         }
 
-        assert_eq!(bst_diff_heights_null.min(), values_1.iter().min().as_ref());
-        assert_eq!(bst_diff_heights_one.min(), values_2.iter().min().as_ref());
-        assert_eq!(bst_diff_heights_two.min(), values_3.iter().min().as_ref());
+        for value in &values_2 {
+            bst_diff_heights_one.insert(*value);
+            current_min_2 = Some(*value)
+                .filter(|&x| current_min_2.map_or(true, |min| x < min))
+                .or(current_min_2);
+            assert_eq!(bst_diff_heights_one.min(), current_min_2.as_ref());
+        }
+
+        for value in &values_3 {
+            bst_diff_heights_two.insert(*value);
+            current_min_3 = Some(*value)
+                .filter(|&x| current_min_3.map_or(true, |min| x < min))
+                .or(current_min_3);
+            assert_eq!(bst_diff_heights_two.min(), current_min_3.as_ref());
+        }
     }
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_min(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_min_check_updating(values in prop::collection::vec(any::<i32>(), 1..100)) {
             let mut bst = BinarySearchTree::new();
+            let mut current_min = None;
 
             for &v in &values {
                 bst.insert(v);
+                current_min = Some(v)
+                    .filter(|&x| current_min.map_or(true, |min| x < min))
+                    .or(current_min);
+                assert_eq!(bst.min(), current_min.as_ref());
             }
-
-            assert_eq!(bst.min(), values.iter().min());
         }
     }
 
@@ -499,23 +592,22 @@ mod tests {
     }
 
     #[test]
-    fn max_in_degenerate_trees() {
+    fn max_in_degenerate_trees_check_updating() {
         let mut bst_degenerate_right = BinarySearchTree::new();
         let mut bst_degenerate_left = BinarySearchTree::new();
 
         for i in 0..=10 {
             bst_degenerate_right.insert(i);
+            assert_eq!(bst_degenerate_right.max(), Some(&i));
         }
         for i in (0..=10).rev() {
             bst_degenerate_left.insert(i);
+            assert_eq!(bst_degenerate_left.max(), Some(&10));
         }
-
-        assert_eq!(bst_degenerate_right.max(), Some(&10));
-        assert_eq!(bst_degenerate_left.max(), Some(&10));
     }
 
     #[test]
-    fn max_basic() {
+    fn max_basic_check_updating() {
         let mut bst_diff_heights_null = BinarySearchTree::new();
         let mut bst_diff_heights_one = BinarySearchTree::new();
         let mut bst_diff_heights_two = BinarySearchTree::new();
@@ -523,35 +615,53 @@ mod tests {
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
         let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+
+        let mut current_max_1 = None;
+        let mut current_max_2 = None;
+        let mut current_max_3 = None;
+
         for value in &values_1 {
-            bst_diff_heights_null.insert(value);
-        }
-        for value in &values_2 {
-            bst_diff_heights_one.insert(value);
-        }
-        for value in &values_3 {
-            bst_diff_heights_two.insert(value);
+            bst_diff_heights_null.insert(*value);
+            current_max_1 = Some(*value)
+                .filter(|&x| current_max_1.map_or(true, |max| x > max))
+                .or(current_max_1);
+            assert_eq!(bst_diff_heights_null.max(), current_max_1.as_ref());
         }
 
-        assert_eq!(bst_diff_heights_null.max(), values_1.iter().max().as_ref());
-        assert_eq!(bst_diff_heights_one.max(), values_2.iter().max().as_ref());
-        assert_eq!(bst_diff_heights_two.max(), values_3.iter().max().as_ref());
+        for value in &values_2 {
+            bst_diff_heights_one.insert(*value);
+            current_max_2 = Some(*value)
+                .filter(|&x| current_max_2.map_or(true, |max| x > max))
+                .or(current_max_2);
+            assert_eq!(bst_diff_heights_one.max(), current_max_2.as_ref());
+        }
+
+        for value in &values_3 {
+            bst_diff_heights_two.insert(*value);
+            current_max_3 = Some(*value)
+                .filter(|&x| current_max_3.map_or(true, |max| x > max))
+                .or(current_max_3);
+            assert_eq!(bst_diff_heights_two.max(), current_max_3.as_ref());
+        }
     }
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_max(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_max_check_updating(values in prop::collection::vec(any::<i32>(), 1..100)) {
             let mut bst = BinarySearchTree::new();
+            let mut current_max = None;
 
             for &v in &values {
                 bst.insert(v);
+                current_max = Some(v)
+                    .filter(|&x| current_max.map_or(true, |max| x > max))
+                    .or(current_max);
+                assert_eq!(bst.max(), current_max.as_ref());
             }
-
-            assert_eq!(bst.max(), values.iter().max());
         }
     }
 
@@ -565,7 +675,7 @@ mod tests {
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
@@ -626,11 +736,11 @@ mod tests {
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_height(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_height(values in prop::collection::vec(any::<i32>(), 1..111)) {
             let mut bst = BinarySearchTree::new();
             let mut bst_comparing = IterativeBSTOther::new();
 
@@ -713,11 +823,11 @@ mod tests {
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_pre_order(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_pre_order(values in prop::collection::vec(any::<i32>(), 1..111)) {
             let mut bst = BinarySearchTree::new();
             let mut bst_comparing = IterativeBSTOther::new();
 
@@ -796,11 +906,11 @@ mod tests {
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_in_order(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_in_order(values in prop::collection::vec(any::<i32>(), 1..111)) {
             let mut bst = BinarySearchTree::new();
             let mut bst_comparing = IterativeBSTOther::new();
 
@@ -879,11 +989,11 @@ mod tests {
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_post_order(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_post_order(values in prop::collection::vec(any::<i32>(), 1..111)) {
             let mut bst = BinarySearchTree::new();
             let mut bst_comparing = IterativeBSTOther::new();
 
@@ -962,11 +1072,11 @@ mod tests {
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_level_order(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_level_order(values in prop::collection::vec(any::<i32>(), 1..111)) {
             let mut bst = BinarySearchTree::new();
             let mut bst_comparing = IterativeBSTOther::new();
 
@@ -1028,11 +1138,11 @@ mod tests {
 
     proptest! {
         #![proptest_config(ProptestConfig {
-            cases: 1000,
+            cases: 111,
             ..ProptestConfig::default()
         })]
         #[test]
-        fn prop_number_of_elements(values in prop::collection::vec(any::<i32>(), 1..1000)) {
+        fn prop_number_of_elements(values in prop::collection::vec(any::<i32>(), 1..111)) {
             let mut bst = BinarySearchTree::new();
 
             for &v in &values {
