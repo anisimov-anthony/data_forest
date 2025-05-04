@@ -307,6 +307,30 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
 
         result
     }
+
+    pub fn floor(&self, value: &T) -> Option<&T> {
+        if self.root.is_none() {
+            return None;
+        }
+
+        let mut result = None;
+        let mut cursor = &self.root;
+
+        while let Some(node) = cursor {
+            if &node.value == value {
+                return Some(&node.value);
+            }
+
+            if &node.value > value {
+                cursor = &node.left;
+            } else {
+                result = Some(&node.value);
+                cursor = &node.right;
+            }
+        }
+
+        result
+    }
 }
 
 #[cfg(test)]
@@ -1264,6 +1288,84 @@ mod tests {
                 .min()
                 .copied();
             assert_eq!(bst.ceil(&i), expected.as_ref());
+            }
+        }
+    }
+
+    #[test]
+    fn floor_in_empty_tree() {
+        let bst = BinarySearchTree::<i32>::new();
+
+        assert_eq!(bst.floor(&0), None);
+    }
+
+    #[test]
+    fn floor_in_degenerate_trees() {
+        let mut bst_degenerate_right = BinarySearchTree::new();
+        let mut bst_degenerate_left = BinarySearchTree::new();
+
+        for i in 0..=10 {
+            let val = i as f64 / 10.0;
+            bst_degenerate_right.insert(val);
+        }
+
+        for i in (0..=10).rev() {
+            let val = i as f64 / 10.0;
+            bst_degenerate_left.insert(val);
+        }
+
+        assert_eq!(bst_degenerate_right.floor(&0.0), Some(&0.0));
+        assert_eq!(bst_degenerate_left.floor(&0.0), Some(&0.0));
+
+        assert_eq!(bst_degenerate_right.floor(&(0.03)), Some(&0.0));
+        assert_eq!(bst_degenerate_left.floor(&(0.03)), Some(&0.0));
+        assert_eq!(bst_degenerate_right.floor(&(0.07)), Some(&0.0));
+        assert_eq!(bst_degenerate_left.floor(&(0.07)), Some(&0.0));
+
+        assert_eq!(bst_degenerate_right.floor(&(-0.9)), None);
+        assert_eq!(bst_degenerate_left.floor(&(-0.9)), None);
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 111,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_floor(values in prop::collection::vec(any::<i32>(), 1..111)) {
+            let mut bst = BinarySearchTree::new();
+            for &v in &values {
+                bst.insert(v);
+            }
+
+            let unique_values: Vec<i32> = values.into_iter().collect::<HashSet<_>>().into_iter().collect();
+
+            for &v in &unique_values {
+                assert_eq!(bst.floor(&v), Some(&v));
+            }
+
+            let test_points = {
+                let mut points = Vec::new();
+                points.push(i32::MIN);
+                points.extend(unique_values.iter().cloned());
+                let mut sorted_values = unique_values.clone();
+                sorted_values.sort();
+                for window in sorted_values.windows(2) {
+                    if window[1] > window[0] + 1 {
+                        points.push(window[0] + 1);
+                    }
+                }
+
+                points.push(i32::MAX);
+                points
+            };
+
+            for &i in &test_points {
+                let expected = unique_values.iter()
+                .filter(|&&x| x <= i)
+                .max()
+                .copied();
+            assert_eq!(bst.floor(&i), expected.as_ref());
             }
         }
     }
