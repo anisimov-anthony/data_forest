@@ -2,13 +2,13 @@ use super::node::BinaryNode;
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 
-pub struct BinarySearchTree<T: Ord + Clone> {
+pub struct BinarySearchTree<T: PartialOrd + Clone> {
     pub root: Option<Box<BinaryNode<T>>>,
     min_value: Option<T>,
     max_value: Option<T>,
 }
 
-impl<T: Ord + Clone> BinarySearchTree<T> {
+impl<T: PartialOrd + Clone> BinarySearchTree<T> {
     pub fn new() -> Self {
         BinarySearchTree {
             root: None,
@@ -70,25 +70,38 @@ impl<T: Ord + Clone> BinarySearchTree<T> {
         Some(leftmost.value)
     }
 
-    pub fn remove(&mut self, value: &T) {
+    pub fn remove(&mut self, value: &T)
+    where
+        T: PartialOrd + Clone,
+    {
         let mut cursor = &mut self.root;
+
         while let Some(current) = cursor {
-            match value.cmp(&current.value) {
-                Ordering::Less => cursor = &mut cursor.as_mut().unwrap().left,
-                Ordering::Greater => cursor = &mut cursor.as_mut().unwrap().right,
-                Ordering::Equal => match (current.left.as_mut(), current.right.as_mut()) {
-                    (None, None) => *cursor = None,
-                    (Some(_), None) => *cursor = current.left.take(),
-                    (None, Some(_)) => *cursor = current.right.take(),
-                    (Some(_), Some(_)) => {
-                        cursor.as_mut().unwrap().value =
-                            Self::pass_and_detach_local_minimum(&mut current.right).unwrap();
+            match value.partial_cmp(&current.value) {
+                Some(Ordering::Less) => {
+                    cursor = &mut cursor.as_mut().unwrap().left;
+                }
+                Some(Ordering::Greater) => {
+                    cursor = &mut cursor.as_mut().unwrap().right;
+                }
+                Some(Ordering::Equal) => {
+                    match (current.left.as_mut(), current.right.as_mut()) {
+                        (None, None) => *cursor = None,
+                        (Some(_), None) => *cursor = current.left.take(),
+                        (None, Some(_)) => *cursor = current.right.take(),
+                        (Some(_), Some(_)) => {
+                            cursor.as_mut().unwrap().value =
+                                Self::pass_and_detach_local_minimum(&mut current.right).unwrap();
+                        }
                     }
-                },
+                    break;
+                }
+                None => {
+                    break;
+                }
             }
         }
 
-        // todo: optimize (this is work twice)
         self.min_value = self.refind_min();
         self.max_value = self.refind_max();
     }
@@ -269,6 +282,30 @@ impl<T: Ord + Clone> BinarySearchTree<T> {
 
     pub fn number_of_elements(&self) -> usize {
         self.pre_order().len() as usize
+    }
+
+    pub fn ceil(&self, value: &T) -> Option<&T> {
+        if self.root.is_none() {
+            return None;
+        }
+
+        let mut result = None;
+        let mut cursor = &self.root;
+
+        while let Some(node) = cursor {
+            if &node.value == value {
+                return Some(&node.value);
+            }
+
+            if &node.value < value {
+                cursor = &node.right;
+            } else {
+                result = Some(&node.value);
+                cursor = &node.left;
+            }
+        }
+
+        result
     }
 }
 
@@ -1150,6 +1187,84 @@ mod tests {
             }
 
             assert_eq!(bst.number_of_elements(), values.iter().collect::<std::collections::HashSet<_>>().len());
+        }
+    }
+
+    #[test]
+    fn ceil_in_empty_tree() {
+        let bst = BinarySearchTree::<i32>::new();
+
+        assert_eq!(bst.ceil(&0), None);
+    }
+
+    #[test]
+    fn ceil_in_degenerate_trees() {
+        let mut bst_degenerate_right = BinarySearchTree::new();
+        let mut bst_degenerate_left = BinarySearchTree::new();
+
+        for i in 0..=10 {
+            let val = i as f64 / 10.0;
+            bst_degenerate_right.insert(val);
+        }
+
+        for i in (0..=10).rev() {
+            let val = i as f64 / 10.0;
+            bst_degenerate_left.insert(val);
+        }
+
+        assert_eq!(bst_degenerate_right.ceil(&0.0), Some(&0.0));
+        assert_eq!(bst_degenerate_left.ceil(&0.0), Some(&0.0));
+
+        assert_eq!(bst_degenerate_right.ceil(&(0.03)), Some(&0.1));
+        assert_eq!(bst_degenerate_left.ceil(&(0.03)), Some(&0.1));
+        assert_eq!(bst_degenerate_right.ceil(&(0.07)), Some(&0.1));
+        assert_eq!(bst_degenerate_left.ceil(&(0.07)), Some(&0.1));
+
+        assert_eq!(bst_degenerate_right.ceil(&1.1), None);
+        assert_eq!(bst_degenerate_left.ceil(&1.1), None);
+    }
+
+    proptest! {
+        #![proptest_config(ProptestConfig {
+            cases: 111,
+            ..ProptestConfig::default()
+        })]
+        #[test]
+        fn prop_ceil(values in prop::collection::vec(any::<i32>(), 1..111)) {
+            let mut bst = BinarySearchTree::new();
+            for &v in &values {
+                bst.insert(v);
+            }
+
+            let unique_values: Vec<i32> = values.into_iter().collect::<HashSet<_>>().into_iter().collect();
+
+            for &v in &unique_values {
+                assert_eq!(bst.ceil(&v), Some(&v));
+            }
+
+            let test_points = {
+                let mut points = Vec::new();
+                points.push(i32::MIN);
+                points.extend(unique_values.iter().cloned());
+                let mut sorted_values = unique_values.clone();
+                sorted_values.sort();
+                for window in sorted_values.windows(2) {
+                    if window[1] > window[0] + 1 {
+                        points.push(window[0] + 1);
+                    }
+                }
+
+                points.push(i32::MAX);
+                points
+            };
+
+            for &i in &test_points {
+                let expected = unique_values.iter()
+                .filter(|&&x| x >= i)
+                .min()
+                .copied();
+            assert_eq!(bst.ceil(&i), expected.as_ref());
+            }
         }
     }
 }
