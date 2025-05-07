@@ -37,12 +37,11 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         let mut cursor = &mut self.root;
 
         while let Some(current_node) = cursor {
-            if current_node.value < value {
-                cursor = &mut current_node.right;
-            } else if current_node.value > value {
-                cursor = &mut current_node.left;
-            } else {
-                return;
+            match value.partial_cmp(&current_node.value) {
+                Some(Ordering::Less) => cursor = &mut current_node.left,
+                Some(Ordering::Greater) => cursor = &mut current_node.right,
+                Some(Ordering::Equal) => return,
+                None => return,
             }
         }
 
@@ -110,12 +109,11 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         let mut cursor = &self.root;
 
         while let Some(current_node) = cursor {
-            if current_node.value < *value {
-                cursor = &current_node.right;
-            } else if current_node.value > *value {
-                cursor = &current_node.left;
-            } else {
-                return true;
+            match value.partial_cmp(&current_node.value) {
+                Some(Ordering::Less) => cursor = &current_node.left,
+                Some(Ordering::Greater) => cursor = &current_node.right,
+                Some(Ordering::Equal) => return true,
+                None => return false,
             }
         }
 
@@ -134,10 +132,9 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         let mut cursor = &self.root;
 
         while let Some(current_node) = cursor {
-            if current_node.left.is_some() {
-                cursor = &current_node.left;
-            } else {
-                return Some(current_node.value.clone());
+            match current_node.left {
+                Some(_) => cursor = &current_node.left,
+                None => return Some(current_node.value.clone()),
             }
         }
         None
