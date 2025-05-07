@@ -120,10 +120,16 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         false
     }
 
+    /// Returns a reference to the minimum element of the tree or `None` if tree is empty.
+    ///
+    /// Complexity: *O*(1) (due to storing the minimum element inside the tree structure).
     pub fn min(&self) -> Option<&T> {
         self.min_value.as_ref()
     }
 
+    /// Returns a reference to the maximum element of the tree or `None` if tree is empty.
+    ///
+    /// Complexity: *O*(1) (due to storing the maximum element inside the tree structure).
     pub fn max(&self) -> Option<&T> {
         self.max_value.as_ref()
     }
