@@ -384,7 +384,7 @@ mod tests {
 
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
         for value in &values_1 {
             bst_diff_heights_null.insert(value);
         }
@@ -497,7 +497,7 @@ mod tests {
 
         let values1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values2 = vec![4, 2, 6, 1, 3, 5];
-        let values3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
 
         for &v in &values1 {
             bst1.insert(v);
@@ -597,7 +597,7 @@ mod tests {
 
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
 
         let mut current_min_1 = None;
         let mut current_min_2 = None;
@@ -678,7 +678,7 @@ mod tests {
 
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
 
         let mut current_max_1 = None;
         let mut current_max_2 = None;
@@ -782,7 +782,7 @@ mod tests {
 
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
         for value in &values_1 {
             bst_diff_heights_null.insert(value);
         }
@@ -858,7 +858,7 @@ mod tests {
 
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
         for value in &values_1 {
             bst_diff_heights_null.insert(value);
         }
@@ -881,7 +881,7 @@ mod tests {
 
         assert_eq!(
             bst_diff_heights_two.pre_order(),
-            vec![&&8, &&4, &&2, &&1, &&6, &&7, &&12, &&10, &&14]
+            vec![&&8, &&4, &&2, &&1, &&6, &&7, &&12, &&10]
         );
     }
 
@@ -941,7 +941,7 @@ mod tests {
 
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
         for value in &values_1 {
             bst_diff_heights_null.insert(value);
         }
@@ -964,7 +964,7 @@ mod tests {
 
         assert_eq!(
             bst_diff_heights_two.in_order(),
-            vec![&&1, &&2, &&4, &&6, &&7, &&8, &&10, &&12, &&14]
+            vec![&&1, &&2, &&4, &&6, &&7, &&8, &&10, &&12]
         );
     }
 
@@ -1024,7 +1024,7 @@ mod tests {
 
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
         for value in &values_1 {
             bst_diff_heights_null.insert(value);
         }
@@ -1047,7 +1047,7 @@ mod tests {
 
         assert_eq!(
             bst_diff_heights_two.post_order(),
-            vec![&&1, &&2, &&7, &&6, &&4, &&10, &&14, &&12, &&8]
+            vec![&&1, &&2, &&7, &&6, &&4, &&10, &&12, &&8]
         );
     }
 
@@ -1107,7 +1107,7 @@ mod tests {
 
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
         for value in &values_1 {
             bst_diff_heights_null.insert(value);
         }
@@ -1130,7 +1130,7 @@ mod tests {
 
         assert_eq!(
             bst_diff_heights_two.level_order(),
-            vec![&&8, &&4, &&12, &&2, &&6, &&10, &&14, &&1, &&7]
+            vec![&&8, &&4, &&12, &&2, &&6, &&10, &&1, &&7]
         );
     }
 
@@ -1184,7 +1184,7 @@ mod tests {
 
         let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
         let values_2 = vec![4, 2, 6, 1, 3, 5];
-        let values_3 = vec![8, 4, 12, 2, 6, 10, 14, 1, 7];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
         for value in &values_1 {
             bst_diff_heights_null.insert(value);
         }
