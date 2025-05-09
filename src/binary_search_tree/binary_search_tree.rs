@@ -9,6 +9,7 @@ pub struct BinarySearchTree<T: PartialOrd + Clone> {
 }
 
 impl<T: PartialOrd + Clone> BinarySearchTree<T> {
+    /// Creates a new empty `BinarySearchTree`.
     pub fn new() -> Self {
         BinarySearchTree {
             root: None,
@@ -17,6 +18,12 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         }
     }
 
+    /// Inserts a `value` into the tree while maintaining BST properties (min/max values).
+    ///
+    /// # Complexity
+    /// - Average: *O*(log n)
+    /// - Worst: *O*(n) (degenerate/unbalanced trees)
+    /// - Best: *O*(1) (empty tree)
     pub fn insert(&mut self, value: T) {
         match (&self.min_value, &self.max_value) {
             (None, None) => {
@@ -69,6 +76,12 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         Some(leftmost.value)
     }
 
+    /// Removes a `value` from the tree while maintaining BST properties (min/max values).
+    ///
+    /// # Complexity
+    /// - Average: *O*(log n)
+    /// - Worst: *O*(n) (degenerate/unbalanced trees)
+    /// - Best: *O*(1) (leaf node)
     pub fn remove(&mut self, value: &T)
     where
         T: PartialOrd + Clone,
@@ -105,6 +118,12 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         self.max_value = self.refind_max();
     }
 
+    /// Checks if the tree contains a `value`.
+    ///
+    /// # Complexity
+    /// - Average: *O*(log n)
+    /// - Worst: *O*(n) (degenerate/unbalanced trees)
+    /// - Best: *O*(1) (root match)
     pub fn contains(&self, value: &T) -> bool {
         let mut cursor = &self.root;
 
@@ -122,14 +141,16 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
 
     /// Returns a reference to the minimum element of the tree or `None` if tree is empty.
     ///
-    /// Complexity: *O*(1) (due to storing the minimum element inside the tree structure).
+    /// # Complexity:
+    /// *O*(1) (due to storing the minimum element inside the tree structure).
     pub fn min(&self) -> Option<&T> {
         self.min_value.as_ref()
     }
 
     /// Returns a reference to the maximum element of the tree or `None` if tree is empty.
     ///
-    /// Complexity: *O*(1) (due to storing the maximum element inside the tree structure).
+    /// # Complexity:
+    /// *O*(1) (due to storing the maximum element inside the tree structure).
     pub fn max(&self) -> Option<&T> {
         self.max_value.as_ref()
     }
@@ -159,6 +180,10 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         None
     }
 
+    /// Returns the height of the tree (longest path from root to leaf).
+    ///
+    /// # Complexity:
+    /// *O*(n) - visits all nodes
     pub fn height(&self) -> usize {
         if self.root.is_none() {
             return 0;
@@ -193,6 +218,22 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         height
     }
 
+    /// Returns references to the elements of the tree in the order of a preorder traversal.
+    ///
+    /// # Complexity:
+    /// *O*(n) - visits all nodes
+    ///
+    /// # Example:
+    ///
+    ///```text
+    ///      1
+    ///     / \
+    ///    2   3
+    ///   / \   \
+    ///  4   5   6
+    ///```
+    ///
+    /// Returns vec![&1, &2, &4, &5, &3, &6]
     pub fn pre_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -211,6 +252,20 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         result
     }
 
+    /// Returns references to the elements of the tree in the order of a inorder traversal.
+    ///
+    /// # Complexity:
+    /// *O*(n) - visits all nodes
+    ///
+    /// # Example:
+    ///```text
+    ///      1
+    ///     / \
+    ///    2   3
+    ///   / \   \
+    ///  4   5   6
+    ///```
+    /// Returns vec![&4, &2, &5, &1, &3, &6]
     pub fn in_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -231,6 +286,23 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         result
     }
 
+    /// Returns references to the elements of the tree in the order of a postorder traversal.
+    ///
+    /// # Complexity:
+    /// *O*(n) - visits all nodes
+    ///
+    /// Example:
+    ///
+    /// Input:
+    ///
+    ///```text
+    ///      1
+    ///     / \
+    ///    2   3
+    ///   / \   \
+    ///  4   5   6
+    ///```
+    /// Returns vec![&4, &5, &2, &6, &3, &1]
     pub fn post_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -261,6 +333,20 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         result
     }
 
+    /// Returns references to the elements of the tree in the order of a level order traversal.
+    ///
+    /// # Complexity:
+    /// *O*(n) - visits all nodes
+    ///
+    /// # Example:
+    ///```text
+    ///      1
+    ///     / \
+    ///    2   3
+    ///   / \   \
+    ///  4   5   6
+    ///```
+    /// Returns vec![&1, &2, &3, &4, &5, &6]
     pub fn level_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut queue = VecDeque::new();
@@ -283,10 +369,23 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         result
     }
 
+    /// Returns the number of elements of the tree.
+    ///
+    /// The number of elements in the vector for the preorder traversal.
+    ///
+    /// # Complexity:
+    /// *O*(n) - traverses entire tree
     pub fn number_of_elements(&self) -> usize {
         self.pre_order().len() as usize
     }
 
+    /// Returns a value that is the rounded `value` to the nearest larger in the tree,
+    /// or returns `None` (if the tree is empty or if such rounding is not possible for the given tree).
+    ///
+    /// # Complexity
+    /// - Best case: *O*(1) - when the value matches the root node
+    /// - Average case: *O*(log n) - for balanced trees
+    /// - Worst case: *O*(n) - for degenerate/unbalanced trees
     pub fn ceil(&self, value: &T) -> Option<&T> {
         if self.root.is_none() {
             return None;
@@ -311,6 +410,13 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         result
     }
 
+    /// Returns a value that is the rounded `value` to the nearest smaller in the tree,
+    /// or returns `None` (if the tree is empty or if such rounding is not possible for the given tree).
+    ///
+    /// # Complexity  
+    /// - Best case: *O*(1) - when the value matches the root node  
+    /// - Average case: *O*(log n) - for balanced trees  
+    /// - Worst case: *O*(n) - for degenerate/unbalanced trees  
     pub fn floor(&self, value: &T) -> Option<&T> {
         if self.root.is_none() {
             return None;
