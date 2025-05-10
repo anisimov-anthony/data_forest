@@ -47,7 +47,6 @@ version = "0.1.0"
 dependencies = [
  "bst-rs",
  "proptest",
- "rand",
 ]
 
 [[package]]

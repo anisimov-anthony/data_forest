@@ -1,30 +1,8 @@
-use super::binary_search_tree::BinarySearchTree;
 use std::fs::File;
 use std::io;
 use std::io::Write;
 
-pub fn find_connections<T: PartialOrd + Clone>(bst: &BinarySearchTree<T>) -> Vec<(&T, &T)> {
-    let mut result = Vec::new();
-    let mut queue = std::collections::VecDeque::new();
-
-    if let Some(root) = &bst.root {
-        queue.push_back(root);
-    }
-
-    while let Some(node) = queue.pop_front() {
-        if let Some(left) = &node.left {
-            queue.push_back(left);
-            result.push((&node.value, &left.value));
-        }
-        if let Some(right) = &node.right {
-            queue.push_back(right);
-            result.push((&node.value, &right.value));
-        }
-    }
-
-    result
-}
-
+/// Converts pairs of connections between `BinaryNode`s in `BinarySearchTree` to graphviz description.
 pub fn convert_to_graphviz<T: std::fmt::Display>(
     connections: &[(T, T)],
     filename: &str,
@@ -46,6 +24,7 @@ pub fn convert_to_graphviz<T: std::fmt::Display>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::binary_search_tree::BinarySearchTree;
     use std::fs;
     use std::path::Path;
 
@@ -74,9 +53,9 @@ mod tests {
             bst_diff_heights_two.insert(value);
         }
 
-        let connections_1 = find_connections(&bst_diff_heights_null);
-        let connections_2 = find_connections(&bst_diff_heights_one);
-        let connections_3 = find_connections(&bst_diff_heights_two);
+        let connections_1 = bst_diff_heights_null.find_connections();
+        let connections_2 = bst_diff_heights_one.find_connections();
+        let connections_3 = bst_diff_heights_two.find_connections();
 
         convert_to_graphviz(&connections_1, "dots/bst_diff_heights_null.dot").unwrap();
         convert_to_graphviz(&connections_2, "dots/bst_diff_heights_one.dot").unwrap();
@@ -101,8 +80,8 @@ mod tests {
             bst_degenerate_left.insert(i);
         }
 
-        let connections_1 = find_connections(&bst_degenerate_left);
-        let connections_2 = find_connections(&bst_degenerate_right);
+        let connections_1 = bst_degenerate_left.find_connections();
+        let connections_2 = bst_degenerate_right.find_connections();
 
         convert_to_graphviz(&connections_1, "dots/bst_degenerate_left.dot").unwrap();
         convert_to_graphviz(&connections_2, "dots/bst_degenerate_right.dot").unwrap();
@@ -116,7 +95,7 @@ mod tests {
         setup();
 
         let bst = BinarySearchTree::<i32>::new();
-        let connections = find_connections(&bst);
+        let connections = bst.find_connections();
         convert_to_graphviz(&connections, "dots/empty_tree.dot").unwrap();
         assert!(Path::new("dots/empty_tree.dot").exists());
     }

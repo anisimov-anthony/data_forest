@@ -2,10 +2,11 @@
 name = "data_forest"
 version = "0.1.0"
 edition = "2024"
+description = "Implementation of various types of trees."
+license = "MIT"
 
 [dependencies]
-rand = "0.8"
-bst-rs = "0.1.0"
+bst-rs = "0.1.0" # Generates data with which the outputs of the tested functions are compared in assertions (during prop testing).
 
 [dev-dependencies]
 proptest = "1.6.0"
