@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 11 
+    reviewers:
+      - "anisimov-anthony" 
+    labels:
+      - "dependencies"
+      - "rust"
+
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "monthly"

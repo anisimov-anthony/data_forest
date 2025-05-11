@@ -157,6 +157,12 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         self.max_value.as_ref()
     }
 
+    /// Each time the tree is updated, you need to re-search for the minimum
+    ///
+    /// # Complexity
+    /// - Average: *O*(log n)
+    /// - Worst: *O*(n) (degenerate/unbalanced trees)
+    /// - Best: *O*(1) (root match)
     fn refind_min(&self) -> Option<T> {
         let mut cursor = &self.root;
 
@@ -169,6 +175,12 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         None
     }
 
+    /// Each time the tree is updated, you need to re-search for the maximum
+    ///
+    /// # Complexity
+    /// - Average: *O*(log n)
+    /// - Worst: *O*(n) (degenerate/unbalanced trees)
+    /// - Best: *O*(1) (root match)
     fn refind_max(&self) -> Option<T> {
         let mut cursor = &self.root;
 

@@ -1,4 +1,4 @@
-name: Rust CI
+name: Rust Build, Test and Coverage
 
 on:
   push:
@@ -10,30 +10,33 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  big_deal:
-    name: Build and test with coverage
+  build:
+    name: Build
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    - name: Build
+      run: cargo build --verbose
 
+  test:
+    name: Run tests with coverage
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
     - name: Install Rust with llvm-tools
       uses: dtolnay/rust-toolchain@stable
       with:
         components: llvm-tools-preview
-
     - name: Install cargo-llvm-cov
       uses: taiki-e/install-action@v2
       with:
         tool: cargo-llvm-cov
-
-    - name: Build
-      run: cargo build --verbose
-
     - name: Run tests with coverage
       run: |
         cargo llvm-cov --locked --all-features --lcov --output-path lcov.info
-
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
