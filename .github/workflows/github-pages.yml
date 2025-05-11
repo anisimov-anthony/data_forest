@@ -1,26 +1,26 @@
-name: Deploy Rust Docs
+name: Deploy Documentation
 
 on:
   push:
-    branches: ["master"]
+    branches: [ main ]
 
 jobs:
-  deploy:
+  deploy-docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
 
       - name: Generate docs
-        run: |
-          cargo doc --no-deps --document-private-items
-          touch target/doc/.nojekyll
-          CRATE_NAME=$(grep '^name =' Cargo.toml | cut -d '"' -f2)
-          ln -s "${CRATE_NAME}/index.html" target/doc/index.html
+        run: cargo doc --no-deps
 
-      - name: Deploy
+      - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
