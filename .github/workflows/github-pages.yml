@@ -2,7 +2,7 @@ name: Deploy Docs to gh-pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 jobs:
   deploy:
