@@ -1,8 +1,11 @@
 # 🌳 Data Forest
-[![Rust](https://img.shields.io/badge/Rust-1.85%2B-orange)](https://www.rust-lang.org) 
-[![CI](https://github.com/anisimov-anthony/data_forest/actions/workflows/rust.yml/badge.svg)](https://github.com/anisimov-anthony/data_forest/actions)
+[![Rust Version](https://img.shields.io/badge/rustc-1.70+-blue.svg)](https://www.rust-lang.org)
+[![CI Tests](https://github.com/anisimov-anthony/data_forest/actions/workflows/build-test-coverage.yml/badge.svg)](https://github.com/anisimov-anthony/data_forest/actions/workflows/build-test-coverage.yml)
+[![Clippy Check](https://github.com/anisimov-anthony/data_forest/actions/workflows/clippy-check.yml/badge.svg)](https://github.com/anisimov-anthony/data_forest/actions/workflows/clippy-check.yml)
+[![Docs Check](https://github.com/anisimov-anthony/data_forest/actions/workflows/docs-check.yml/badge.svg)](https://github.com/anisimov-anthony/data_forest/actions/workflows/docs-check.yml)
 [![codecov](https://codecov.io/gh/anisimov-anthony/data_forest/branch/master/graph/badge.svg?token=NEBBSV6XXK)](https://codecov.io/gh/anisimov-anthony/data_forest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Docs](https://img.shields.io/badge/docs-latest-blue)](https://anisimov-anthony.github.io/data_forest)
 
 **Rust Implementation of Tree Data Structures**
 
