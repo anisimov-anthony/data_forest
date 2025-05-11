@@ -12,24 +12,9 @@ readme = "README.md"
 keywords = [
     "data-structures",
     "tree",
-    "binary-search-tree",
-    "bst",
-    "BST",
-    "avl-tree",
-    "avl",
-    "AVL",
-    "red-black-tree",
-    "rbt",
-    "RBT",
-    "b-tree",
-    "bplus-tree",
-    "slm-tree",
     "search-tree",
     "balanced-tree",
-    "rust-library",
     "algorithm",
-    "computer-science",
-    "educational"
 ]
 categories = [
     "algorithms",
