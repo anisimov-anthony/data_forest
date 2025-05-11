@@ -18,6 +18,11 @@ jobs:
           cargo doc --no-deps --document-private-items
           touch target/doc/.nojekyll
 
+      - name: Move docs to root
+      run: |
+        mv target/doc/data_forest/* target/doc/
+        rmdir target/doc/data_forest
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
