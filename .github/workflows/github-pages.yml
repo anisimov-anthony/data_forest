@@ -1,25 +1,27 @@
-name: Deploy Documentation
+name: Deploy Docs to gh-pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  deploy-docs:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-      
+
       - name: Generate docs
+        run: cargo doc --no-deps --document-private-items
+
+      - name: Prepare docs folder
         run: |
-          cargo doc --no-deps
-          echo "<meta http-equiv=\"refresh\" content=\"0; url=data_forest/index.html\" />" > target/doc/index.html
-          
-      - name: Deploy to GitHub Pages
+          mkdir -p docs
+          cp -r target/doc/data_forest/* docs/
+          echo '<meta http-equiv="refresh" content="0; url=data_forest/index.html">' > docs/index.html
+
+      - name: Push to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/doc
+          publish_dir: ./docs
+          force_orphan: true
