@@ -1,4 +1,4 @@
-name: Deploy Docs
+name: Deploy Rust Docs
 
 on:
   push:
@@ -8,31 +8,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-    
-    - name: Generate documentation
-      run: |
-        cargo doc --no-deps --document-private-items
-        echo '<!DOCTYPE html>
-        <html>
-        <head>
-            <meta http-equiv="refresh" content="0; url=data_forest/index.html">
-            <title>Redirecting...</title>
-            <script>window.location.href="data_forest/index.html"</script>
-        </head>
-        <body>
-            <p>If you are not redirected, <a href="data_forest/index.html">click here</a>.</p>
-        </body>
-        </html>' > target/doc/index.html
-        
-        touch target/doc/.nojekyll
-    
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./target/doc
-        keep_files: false  
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Generate Rust documentation
+        run: |
+          cargo doc --no-deps --document-private-items
+          touch target/doc/.nojekyll
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/doc
+          publish_branch: gh-pages
+          keep_files: false
