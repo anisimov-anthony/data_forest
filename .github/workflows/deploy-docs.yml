@@ -1,7 +1,12 @@
 name: Deploy Rust Docs to GitHub Pages
 
 on:
-  workflow_dispatch: 
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   build-and-deploy:
