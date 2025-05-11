@@ -4,6 +4,38 @@ version = "0.1.0"
 edition = "2024"
 description = "Implementation of various types of trees."
 license = "MIT"
+authors = ["Anton Anisimov <anisimov.anton.main@gmail.com>"]
+repository = "https://github.com/anisimov-anthony/data_forest"
+documentation = "https://docs.rs/data_forest"
+homepage = "https://github.com/anisimov-anthony/data_forest"
+readme = "README.md"
+keywords = [
+    "data-structures",
+    "tree",
+    "binary-search-tree",
+    "bst",
+    "BST",
+    "avl-tree",
+    "avl",
+    "AVL",
+    "red-black-tree",
+    "rbt",
+    "RBT",
+    "b-tree",
+    "bplus-tree",
+    "slm-tree",
+    "search-tree",
+    "balanced-tree",
+    "rust-library",
+    "algorithm",
+    "computer-science",
+    "educational"
+]
+categories = [
+    "algorithms",
+    "data-structures",
+    "science"
+]
 
 [dependencies]
 bst-rs = "0.1.0" # Generates data with which the outputs of the tested functions are compared in assertions (during prop testing).
