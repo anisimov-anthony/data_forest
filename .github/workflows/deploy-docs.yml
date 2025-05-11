@@ -24,10 +24,15 @@ jobs:
       - name: Build docs
         run: cargo doc --no-deps
 
+      - name: Copy docs to data_forest
+        run: |
+          mkdir -p data_forest  # Убедимся, что папка существует
+          cp -r target/doc/* data_forest/  # Копируем всю документацию в data_forest
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./target/doc
+          publish_dir: ./data_forest  # Указываем на папку, куда скопированы файлы
           force_orphan: true
 
