@@ -33,6 +33,6 @@ Build a modular Rust library implementing various tree data structures
 
 ## License
 
-MIT License © 2025 Anton Anisimo (anisimov-anthony)
+MIT License © 2025 Anton Anisimov (anisimov-anthony)
 
 Full text: `LICENSE.md`
