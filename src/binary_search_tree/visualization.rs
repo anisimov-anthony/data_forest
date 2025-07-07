@@ -13,7 +13,7 @@ pub fn convert_to_graphviz<T: std::fmt::Display>(
     writeln!(&mut file, "    node [shape=circle];")?;
 
     for (parent, child) in connections {
-        writeln!(&mut file, "    {} -> {};", parent, child)?;
+        writeln!(&mut file, "    {parent} -> {child};")?;
     }
 
     writeln!(&mut file, "}}")?;
