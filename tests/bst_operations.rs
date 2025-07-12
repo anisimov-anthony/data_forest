@@ -5,6 +5,16 @@ use proptest::prelude::*;
 use std::collections::HashSet;
 
 #[test]
+fn is_and_isnt_empty_tree() {
+    let bst_1 = BinarySearchTree::<i32>::new();
+    assert!(bst_1.is_empty());
+
+    let mut bst_2 = BinarySearchTree::<i32>::new();
+    bst_2.insert(42);
+    assert!(!bst_2.is_empty());
+}
+
+#[test]
 fn contains_in_empty_tree() {
     let bst = BinarySearchTree::<i32>::new();
 
