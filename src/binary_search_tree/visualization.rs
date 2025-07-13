@@ -13,7 +13,7 @@ pub fn convert_to_graphviz<T: std::fmt::Display>(
     writeln!(&mut file, "    node [shape=circle];")?;
 
     for (parent, child) in connections {
-        writeln!(&mut file, "    {} -> {};", parent, child)?;
+        writeln!(&mut file, "    {parent} -> {child};")?;
     }
 
     writeln!(&mut file, "}}")?;
@@ -29,7 +29,7 @@ mod tests {
     use std::path::Path;
 
     fn setup() {
-        fs::create_dir_all("dots").unwrap();
+        fs::create_dir_all("dots/BST").unwrap();
     }
 
     #[test]
@@ -57,13 +57,13 @@ mod tests {
         let connections_2 = bst_diff_heights_one.find_connections();
         let connections_3 = bst_diff_heights_two.find_connections();
 
-        convert_to_graphviz(&connections_1, "dots/bst_diff_heights_null.dot").unwrap();
-        convert_to_graphviz(&connections_2, "dots/bst_diff_heights_one.dot").unwrap();
-        convert_to_graphviz(&connections_3, "dots/bst_diff_heights_two.dot").unwrap();
+        convert_to_graphviz(&connections_1, "dots/BST/bst_diff_heights_null.dot").unwrap();
+        convert_to_graphviz(&connections_2, "dots/BST/bst_diff_heights_one.dot").unwrap();
+        convert_to_graphviz(&connections_3, "dots/BST/bst_diff_heights_two.dot").unwrap();
 
-        assert!(Path::new("dots/bst_diff_heights_null.dot").exists());
-        assert!(Path::new("dots/bst_diff_heights_one.dot").exists());
-        assert!(Path::new("dots/bst_diff_heights_two.dot").exists());
+        assert!(Path::new("dots/BST/bst_diff_heights_null.dot").exists());
+        assert!(Path::new("dots/BST/bst_diff_heights_one.dot").exists());
+        assert!(Path::new("dots/BST/bst_diff_heights_two.dot").exists());
     }
 
     #[test]
@@ -83,11 +83,11 @@ mod tests {
         let connections_1 = bst_degenerate_left.find_connections();
         let connections_2 = bst_degenerate_right.find_connections();
 
-        convert_to_graphviz(&connections_1, "dots/bst_degenerate_left.dot").unwrap();
-        convert_to_graphviz(&connections_2, "dots/bst_degenerate_right.dot").unwrap();
+        convert_to_graphviz(&connections_1, "dots/BST/bst_degenerate_left.dot").unwrap();
+        convert_to_graphviz(&connections_2, "dots/BST/bst_degenerate_right.dot").unwrap();
 
-        assert!(Path::new("dots/bst_degenerate_right.dot").exists());
-        assert!(Path::new("dots/bst_degenerate_left.dot").exists());
+        assert!(Path::new("dots/BST/bst_degenerate_right.dot").exists());
+        assert!(Path::new("dots/BST/bst_degenerate_left.dot").exists());
     }
 
     #[test]
@@ -96,7 +96,7 @@ mod tests {
 
         let bst = BinarySearchTree::<i32>::new();
         let connections = bst.find_connections();
-        convert_to_graphviz(&connections, "dots/empty_tree.dot").unwrap();
-        assert!(Path::new("dots/empty_tree.dot").exists());
+        convert_to_graphviz(&connections, "dots/BST/empty_tree.dot").unwrap();
+        assert!(Path::new("dots/BST/empty_tree.dot").exists());
     }
 }
