@@ -14,15 +14,15 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
 
     /// Checks if the tree is empty.
     ///
-    /// # Complexity
-    /// *O*(1) - checks if root is `None`
+    /// # Complexity:
+    /// *O*(1) - checks if root is `None`.
     pub fn is_empty(&self) -> bool {
         self.root.is_none()
     }
 
     /// Inserts a `value` into the tree while maintaining tree properties (min/max values).
     ///
-    /// # Complexity
+    /// # Complexity:
     /// - Average: *O*(log n)
     /// - Worst: *O*(n) (degenerate/unbalanced trees)
     /// - Best: *O*(1) (empty tree)
@@ -80,7 +80,7 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
 
     /// Removes a `value` from the tree while maintaining tree properties (min/max values).
     ///
-    /// # Complexity
+    /// # Complexity:
     /// - Average: *O*(log n)
     /// - Worst: *O*(n) (degenerate/unbalanced trees)
     /// - Best: *O*(1) (leaf node)
@@ -122,7 +122,7 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
 
     /// Checks if the tree contains a `value`.
     ///
-    /// # Complexity
+    /// # Complexity:
     /// - Average: *O*(log n)
     /// - Worst: *O*(n) (degenerate/unbalanced trees)
     /// - Best: *O*(1) (root match)
@@ -157,7 +157,7 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         self.max_value.as_ref()
     }
 
-    /// Each time the tree is updated, you need to re-search for the minimum
+    /// Each time the tree is updated, you need to re-search for the minimum.
     ///
     /// # Complexity
     /// - Average: *O*(log n)
@@ -175,9 +175,9 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
         None
     }
 
-    /// Each time the tree is updated, you need to re-search for the maximum
+    /// Each time the tree is updated, you need to re-search for the maximum.
     ///
-    /// # Complexity
+    /// # Complexity:
     /// - Average: *O*(log n)
     /// - Worst: *O*(n) (degenerate/unbalanced trees)
     /// - Best: *O*(1) (root match)
@@ -197,7 +197,7 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
     /// Returns the height of the tree (longest path from root to leaf).
     ///
     /// # Complexity:
-    /// *O*(n) - visits all nodes
+    /// *O*(n) - visits all nodes.
     pub fn height(&self) -> usize {
         if self.root.is_none() {
             return 0;
@@ -235,20 +235,20 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
     /// Returns references to the elements of the tree in the order of a preorder traversal.
     ///
     /// # Complexity:
-    /// *O*(n) - visits all nodes
+    /// *O*(n) - visits all nodes.
     ///
     /// # Example:
     ///
     /// If such a tree is given
     ///```text
-    ///      1
+    ///      4
     ///     / \
-    ///    2   3
+    ///    2   5
     ///   / \   \
-    ///  4   5   6
+    ///  1   3   6
     ///```
     ///
-    /// Then the result of this traversal will be like this: `vec![&1, &2, &4, &5, &3, &6]`
+    /// Then the result of this traversal will be like this: `vec![&4, &2, &1, &3, &5, &6]`.
     pub fn pre_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -270,19 +270,19 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
     /// Returns references to the elements of the tree in the order of a inorder traversal.
     ///
     /// # Complexity:
-    /// *O*(n) - visits all nodes
+    /// *O*(n) - visits all nodes.
     ///
     /// # Example:
     ///
     /// If such a tree is given
     ///```text
-    ///      1
+    ///      4
     ///     / \
-    ///    2   3
+    ///    2   5
     ///   / \   \
-    ///  4   5   6
+    ///  1   3   6
     ///```
-    /// Then the result of this traversal will be like this: `vec![&4, &2, &5, &1, &3, &6]`
+    /// Then the result of this traversal will be like this: `vec![&1, &2, &3, &4, &5, &6]`.
     pub fn in_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -306,19 +306,19 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
     /// Returns references to the elements of the tree in the order of a postorder traversal.
     ///
     /// # Complexity:
-    /// *O*(n) - visits all nodes
+    /// *O*(n) - visits all nodes.
     ///
     /// # Example:
     ///
     /// If such a tree is given
     ///```text
-    ///      1
+    ///      4
     ///     / \
-    ///    2   3
+    ///    2   5
     ///   / \   \
-    ///  4   5   6
+    ///  1   3   6
     ///```
-    /// Then the result of this traversal will be like this: `vec![&4, &5, &2, &6, &3, &1]`
+    /// Then the result of this traversal will be like this: `vec![&1, &3, &2, &6, &5, &4]`.
     pub fn post_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -352,19 +352,19 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
     /// Returns references to the elements of the tree in the order of a level order traversal.
     ///
     /// # Complexity:
-    /// *O*(n) - visits all nodes
+    /// *O*(n) - visits all nodes.
     ///
     /// # Example:
     ///
     /// If such a tree is given
     ///```text
-    ///      1
+    ///      4
     ///     / \
-    ///    2   3
+    ///    2   5
     ///   / \   \
-    ///  4   5   6
+    ///  1   3   6
     ///```
-    /// Then the result of this traversal will be like this: `vec![&1, &2, &3, &4, &5, &6]`
+    /// Then the result of this traversal will be like this: `vec![&4, &2, &5, &1, &3, &6]`.
     pub fn level_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut queue = VecDeque::new();
@@ -391,7 +391,7 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
     /// for the preorder traversal).
     ///
     /// # Complexity:
-    /// *O*(n) - traverses entire tree
+    /// *O*(n) - traverses entire tree.
     pub fn number_of_elements(&self) -> usize {
         self.pre_order().len()
     }
@@ -400,7 +400,7 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
     /// or returns `None` (if the tree is empty or if such rounding is not possible for this tree and
     /// given `value`).
     ///
-    /// # Complexity
+    /// # Complexity:
     /// - Best case: *O*(1) - when the value matches the root node
     /// - Average case: *O*(log n) - for balanced trees
     /// - Worst case: *O*(n) - for degenerate/unbalanced trees
@@ -430,7 +430,7 @@ impl<T: PartialOrd + Clone> BinarySearchTree<T> {
     /// or returns `None` (if the tree is empty or if such rounding is not possible for this tree and
     /// given `value`).
     ///
-    /// # Complexity  
+    /// # Complexity:
     /// - Best case: *O*(1) - when the value matches the root node  
     /// - Average case: *O*(log n) - for balanced trees  
     /// - Worst case: *O*(n) - for degenerate/unbalanced trees  
