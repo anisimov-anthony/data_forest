@@ -7,31 +7,35 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/docs-latest-blue)](https://anisimov-anthony.github.io/data_forest)
 
-**Rust Implementation of Tree Data Structures**
+**🦀 Rust Implementation of Tree Data Structures**
 
-## Author
+## 👨 Author
 
 **Anton Anisimov** ([anisimov-anthony](https://github.com/anisimov-anthony))
 
-## Project Goals
+## 🎯 Project Goals
 
 Build a modular Rust library implementing various tree data structures
 
 ## Supported Trees
 
-### In progress:
+### ✅ Implemented:
 
 - Binary search tree
-
-### Planned:
-
 - AVL tree
+
+###  📅 Planned:
+
 - RB tree
 - B tree
 - B+ tree
 - SLM tree
 
-## License
+## 🤝 Contributing
+PRs welcome!
+Found a bug? Please open an issue!
+
+## ⚖️ License
 
 MIT License © 2025 Anton Anisimov (anisimov-anthony)
 
