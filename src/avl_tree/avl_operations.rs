@@ -14,14 +14,20 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
 
     /// Checks if the tree is empty.
     ///
-    /// # Complexity
-    /// *O*(1) - checks if root is `None`
+    /// # Complexity:
+    /// *O*(1) - checks if root is `None`.
     ///
-    /// The logic is the same as in `BST`
+    /// The logic is the same as in `BST`.
     pub fn is_empty(&self) -> bool {
         self.root.is_none()
     }
 
+    /// Inserts a `value` into the tree while maintaining AVL balance properties.
+    ///
+    /// Automatically performs rotations to maintain balance factor ∈ [-1, 0, 1].
+    ///
+    /// # Complexity:
+    /// *O*(log n) - guaranteed due to AVL balancing.
     pub fn insert(&mut self, value: T) {
         self.root = AVLTree::insert_rec(self.root.take(), value);
 
@@ -49,27 +55,12 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         }
     }
 
-    fn pass_and_detach_local_minimum(root: &mut Option<Box<AVLNode<T>>>) -> Option<T> {
-        if root.is_none() {
-            return None;
-        }
-
-        if root.as_mut().unwrap().left.is_none() {
-            let node = root.take().unwrap();
-            *root = node.right;
-            return Some(node.value);
-        }
-
-        let mut parent = root.as_mut().unwrap();
-        while parent.left.as_ref().unwrap().left.is_some() {
-            parent = parent.left.as_mut().unwrap();
-        }
-
-        let leftmost = parent.left.take().unwrap();
-        parent.left = leftmost.right;
-        Some(leftmost.value)
-    }
-
+    /// Removes a `value` from the tree while maintaining AVL balance properties.
+    ///
+    /// Performs automatic rebalancing through rotations after deletion.
+    ///
+    /// # Complexity:
+    /// *O*(log n) - guaranteed due to AVL balancing.
     pub fn remove(&mut self, value: &T)
     where
         T: PartialOrd + Clone,
@@ -134,12 +125,33 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         }
     }
 
+    /// Checks if the tree contains a `value`.
+    ///
+    /// # Complexity:
+    /// *O*(log n) - guaranteed due to AVL balancing.
+    ///
+    /// The logic is the same as in `BST`.
+    pub fn contains(&self, value: &T) -> bool {
+        let mut cursor = &self.root;
+
+        while let Some(current_node) = cursor {
+            match value.partial_cmp(&current_node.value) {
+                Some(Ordering::Less) => cursor = &current_node.left,
+                Some(Ordering::Greater) => cursor = &current_node.right,
+                Some(Ordering::Equal) => return true,
+                None => return false,
+            }
+        }
+
+        false
+    }
+
     /// Returns a reference to the minimum element of the tree or `None` if tree is empty.
     ///
     /// # Complexity:
     /// *O*(1) (due to storing the minimum element inside the tree structure).
     ///
-    /// The logic is the same as in `BST`
+    /// The logic is the same as in `BST`.
     pub fn min(&self) -> Option<&T> {
         self.min_value.as_ref()
     }
@@ -149,13 +161,17 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
     /// # Complexity:
     /// *O*(1) (due to storing the maximum element inside the tree structure).
     ///
-    /// The logic is the same as in `BST`
+    /// The logic is the same as in `BST`.
     pub fn max(&self) -> Option<&T> {
         self.max_value.as_ref()
     }
 
+    /// Each time the tree is updated, you need to re-search for the minimum.
     ///
-    /// The logic is the same as in `BST`
+    /// # Complexity:
+    /// *O*(log n) - guaranteed due to AVL balancing.
+    ///
+    /// The logic is the same as in `BST`.
     fn refind_min(&self) -> Option<T> {
         let mut cursor = &self.root;
 
@@ -168,8 +184,12 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         None
     }
 
+    /// Each time the tree is updated, you need to re-search for the maximum.
     ///
-    /// The logic is the same as in `BST`
+    /// # Complexity:
+    /// *O*(log n) - guaranteed due to AVL balancing.
+    ///
+    /// The logic is the same as in `BST`.
     fn refind_max(&self) -> Option<T> {
         let mut cursor = &self.root;
 
@@ -183,8 +203,12 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         None
     }
 
+    /// Returns the height of the tree (longest path from root to leaf).
     ///
-    /// The logic is the same as in `BST`
+    /// # Complexity:
+    /// *O*(n) - visits all nodes.
+    ///
+    /// The logic is the same as in `BST`.
     pub fn height(&self) -> usize {
         if self.root.is_none() {
             return 0;
@@ -219,8 +243,25 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         height
     }
 
+    /// Returns references to the elements of the tree in the order of a preorder traversal.
     ///
-    /// The logic is the same as in `BST`
+    /// # Complexity:
+    /// *O*(n) - visits all nodes.
+    ///
+    /// # Example:
+    ///
+    /// If such a tree is given
+    ///```text
+    ///      4
+    ///     / \
+    ///    2   5
+    ///   / \   \
+    ///  1   3   6
+    ///```
+    ///
+    /// Then the result of this traversal will be like this: `vec![&4, &2, &1, &3, &5, &6]`.
+    ///
+    /// The logic is the same as in `BST`.
     pub fn pre_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -239,8 +280,24 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         result
     }
 
+    /// Returns references to the elements of the tree in the order of a inorder traversal.
     ///
-    /// The logic is the same as in `BST`
+    /// # Complexity:
+    /// *O*(n) - visits all nodes.
+    ///
+    /// # Example:
+    ///
+    /// If such a tree is given
+    ///```text
+    ///      4
+    ///     / \
+    ///    2   5
+    ///   / \   \
+    ///  1   3   6
+    ///```
+    /// Then the result of this traversal will be like this: `vec![&1, &2, &3, &4, &5, &6]`.
+    ///
+    /// The logic is the same as in `BST`.
     pub fn in_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -261,8 +318,24 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         result
     }
 
+    /// Returns references to the elements of the tree in the order of a postorder traversal.
     ///
-    /// The logic is the same as in `BST`
+    /// # Complexity:
+    /// *O*(n) - visits all nodes.
+    ///
+    /// # Example:
+    ///
+    /// If such a tree is given
+    ///```text
+    ///      4
+    ///     / \
+    ///    2   5
+    ///   / \   \
+    ///  1   3   6
+    ///```
+    /// Then the result of this traversal will be like this: `vec![&1, &3, &2, &6, &5, &4]`.
+    ///
+    /// The logic is the same as in `BST`.
     pub fn post_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut stack = Vec::new();
@@ -293,8 +366,24 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         result
     }
 
+    /// Returns references to the elements of the tree in the order of a level order traversal.
     ///
-    /// The logic is the same as in `BST`
+    /// # Complexity:
+    /// *O*(n) - visits all nodes.
+    ///
+    /// # Example:
+    ///
+    /// If such a tree is given
+    ///```text
+    ///      4
+    ///     / \
+    ///    2   5
+    ///   / \   \
+    ///  1   3   6
+    ///```
+    /// Then the result of this traversal will be like this: `vec![&4, &2, &5, &1, &3, &6]`.
+    ///
+    /// The logic is the same as in `BST`.
     pub fn level_order(&self) -> Vec<&T> {
         let mut result = Vec::new();
         let mut queue = VecDeque::new();
@@ -317,31 +406,25 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         result
     }
 
+    /// Returns the number of elements of the tree (the number of elements in the vector
+    /// for the preorder traversal).
     ///
-    /// The logic is the same as in `BST`
+    /// # Complexity:
+    /// *O*(n) - traverses entire tree.
+    ///
+    /// The logic is the same as in `BST`.
     pub fn number_of_elements(&self) -> usize {
         self.pre_order().len()
     }
 
+    /// Returns a value that is the rounded `value` to the nearest larger in the tree,
+    /// or returns `None` (if the tree is empty or if such rounding is not possible for this tree and
+    /// given `value`).
     ///
-    /// The logic is the same as in `BST`
-    pub fn contains(&self, value: &T) -> bool {
-        let mut cursor = &self.root;
-
-        while let Some(current_node) = cursor {
-            match value.partial_cmp(&current_node.value) {
-                Some(Ordering::Less) => cursor = &current_node.left,
-                Some(Ordering::Greater) => cursor = &current_node.right,
-                Some(Ordering::Equal) => return true,
-                None => return false,
-            }
-        }
-
-        false
-    }
-
+    /// # Complexity:
+    /// *O*(log n) - guaranteed due to AVL balancing.
     ///
-    /// The logic is the same as in `BST`
+    /// The logic is the same as in `BST`.
     pub fn ceil(&self, value: &T) -> Option<&T> {
         self.root.as_ref()?;
 
@@ -364,8 +447,14 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         result
     }
 
+    /// Returns a value that is the rounded `value` to the nearest smaller in the tree,
+    /// or returns `None` (if the tree is empty or if such rounding is not possible for this tree and
+    /// given `value`).
     ///
-    /// The logic is the same as in `BST`
+    /// # Complexity:
+    /// *O*(log n) - guaranteed due to AVL balancing.
+    ///
+    /// The logic is the same as in `BST`.
     pub fn floor(&self, value: &T) -> Option<&T> {
         self.root.as_ref()?;
 
@@ -390,7 +479,7 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
 
     /// Performs a tree traversal and returns all pairs of connections between nodes.
     ///
-    /// The logic is the same as in `BST`
+    /// The logic is the same as in `BST`.
     pub fn find_connections(&self) -> Vec<(&T, &T)> {
         let mut result = Vec::new();
         let mut queue = std::collections::VecDeque::new();
@@ -417,5 +506,520 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
 impl<T: PartialOrd + Clone> Default for AVLTree<T> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn is_and_isnt_empty_tree() {
+        let avl_1 = AVLTree::<i32>::new();
+        assert!(avl_1.is_empty());
+
+        let mut avl_2 = AVLTree::<i32>::new();
+        avl_2.insert(42);
+        assert!(!avl_2.is_empty());
+    }
+
+    #[test]
+    fn contains_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert!(!avl.contains(&42));
+    }
+
+    #[test]
+    fn contains_in_single_node_tree() {
+        let mut avl = AVLTree::new();
+        avl.insert(1);
+
+        assert!(avl.contains(&1));
+    }
+
+    #[test]
+    fn contains_basic() {
+        let mut avl_diff_heights_null = AVLTree::new();
+        let mut avl_diff_heights_one = AVLTree::new();
+        let mut avl_diff_heights_two = AVLTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+        for value in &values_1 {
+            avl_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            avl_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            avl_diff_heights_two.insert(value);
+        }
+
+        for value in &values_1 {
+            assert!(avl_diff_heights_null.contains(&value));
+        }
+        for value in &values_2 {
+            assert!(avl_diff_heights_one.contains(&value));
+        }
+        for value in &values_3 {
+            assert!(avl_diff_heights_two.contains(&value));
+        }
+    }
+
+    #[test]
+    fn remove_from_empty_tree() {
+        let mut avl = AVLTree::<i32>::new();
+
+        avl.remove(&42);
+
+        assert!(!avl.contains(&42));
+        assert_eq!(avl.min(), None);
+        assert_eq!(avl.max(), None);
+    }
+
+    #[test]
+    fn remove_from_single_node_tree_check_min_max_updating() {
+        let mut avl = AVLTree::new();
+        assert!(avl.max() == avl.min() && avl.max() == None);
+
+        avl.insert(1);
+        assert!(avl.max() == avl.min() && avl.max() == Some(&1));
+        assert!(avl.contains(&1));
+
+        avl.remove(&1);
+        assert!(avl.max() == avl.min() && avl.max() == None);
+        assert!(!avl.contains(&1));
+    }
+
+    #[test]
+    fn remove_basic_check_min_max_updating() {
+        let mut avl1 = AVLTree::new();
+        let mut avl2 = AVLTree::new();
+        let mut avl3 = AVLTree::new();
+
+        let values1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values2 = vec![4, 2, 6, 1, 3, 5];
+        let values3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+
+        for &v in &values1 {
+            avl1.insert(v);
+        }
+        for &v in &values2 {
+            avl2.insert(v);
+        }
+        for &v in &values3 {
+            avl3.insert(v);
+        }
+
+        let mut remaining1 = values1.clone();
+        let mut remaining2 = values2.clone();
+        let mut remaining3 = values3.clone();
+
+        for &v in &values1 {
+            avl1.remove(&v);
+            remaining1.retain(|&x| x != v);
+
+            assert!(!avl1.contains(&v));
+            assert_eq!(avl1.min(), remaining1.iter().min());
+            assert_eq!(avl1.max(), remaining1.iter().max());
+        }
+
+        for &v in &values2 {
+            avl2.remove(&v);
+            remaining2.retain(|&x| x != v);
+
+            assert!(!avl2.contains(&v));
+            assert_eq!(avl2.min(), remaining2.iter().min());
+            assert_eq!(avl2.max(), remaining2.iter().max());
+        }
+
+        for &v in &values3 {
+            avl3.remove(&v);
+            remaining3.retain(|&x| x != v);
+
+            assert!(!avl3.contains(&v));
+            assert_eq!(avl3.min(), remaining3.iter().min());
+            assert_eq!(avl3.max(), remaining3.iter().max());
+        }
+    }
+
+    #[test]
+    fn min_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.min(), None);
+    }
+
+    #[test]
+    fn min_basic_check_updating() {
+        let mut avl_diff_heights_null = AVLTree::new();
+        let mut avl_diff_heights_one = AVLTree::new();
+        let mut avl_diff_heights_two = AVLTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+
+        let mut current_min_1 = None;
+        let mut current_min_2 = None;
+        let mut current_min_3 = None;
+
+        for value in &values_1 {
+            avl_diff_heights_null.insert(*value);
+            current_min_1 = Some(*value)
+                .filter(|&x| current_min_1.map_or(true, |min| x < min))
+                .or(current_min_1);
+            assert_eq!(avl_diff_heights_null.min(), current_min_1.as_ref());
+        }
+
+        for value in &values_2 {
+            avl_diff_heights_one.insert(*value);
+            current_min_2 = Some(*value)
+                .filter(|&x| current_min_2.map_or(true, |min| x < min))
+                .or(current_min_2);
+            assert_eq!(avl_diff_heights_one.min(), current_min_2.as_ref());
+        }
+
+        for value in &values_3 {
+            avl_diff_heights_two.insert(*value);
+            current_min_3 = Some(*value)
+                .filter(|&x| current_min_3.map_or(true, |min| x < min))
+                .or(current_min_3);
+            assert_eq!(avl_diff_heights_two.min(), current_min_3.as_ref());
+        }
+    }
+
+    #[test]
+    fn max_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.max(), None);
+    }
+
+    #[test]
+    fn max_basic_check_updating() {
+        let mut avl_diff_heights_null = AVLTree::new();
+        let mut avl_diff_heights_one = AVLTree::new();
+        let mut avl_diff_heights_two = AVLTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+
+        let mut current_max_1 = None;
+        let mut current_max_2 = None;
+        let mut current_max_3 = None;
+
+        for value in &values_1 {
+            avl_diff_heights_null.insert(*value);
+            current_max_1 = Some(*value)
+                .filter(|&x| current_max_1.map_or(true, |max| x > max))
+                .or(current_max_1);
+            assert_eq!(avl_diff_heights_null.max(), current_max_1.as_ref());
+        }
+
+        for value in &values_2 {
+            avl_diff_heights_one.insert(*value);
+            current_max_2 = Some(*value)
+                .filter(|&x| current_max_2.map_or(true, |max| x > max))
+                .or(current_max_2);
+            assert_eq!(avl_diff_heights_one.max(), current_max_2.as_ref());
+        }
+
+        for value in &values_3 {
+            avl_diff_heights_two.insert(*value);
+            current_max_3 = Some(*value)
+                .filter(|&x| current_max_3.map_or(true, |max| x > max))
+                .or(current_max_3);
+            assert_eq!(avl_diff_heights_two.max(), current_max_3.as_ref());
+        }
+    }
+
+    #[test]
+    fn max_min_are_similar_for_single_element_tree() {
+        let mut avl = AVLTree::new();
+        avl.insert(1);
+
+        assert!(avl.min() == avl.max() && avl.min() == Some(&1));
+    }
+
+    #[test]
+    fn height_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.height(), 0);
+    }
+
+    #[test]
+    fn height_basic() {
+        let mut avl_diff_heights_null = AVLTree::new();
+        let mut avl_diff_heights_one = AVLTree::new();
+        let mut avl_diff_heights_two = AVLTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+        for value in &values_1 {
+            avl_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            avl_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            avl_diff_heights_two.insert(value);
+        }
+
+        assert_eq!(avl_diff_heights_null.height(), 2);
+        assert_eq!(avl_diff_heights_one.height(), 2);
+        assert_eq!(avl_diff_heights_two.height(), 3);
+    }
+
+    #[test]
+    fn pre_order_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.pre_order(), Vec::<&i32>::new());
+    }
+
+    #[test]
+    fn pre_order_basic() {
+        let mut avl_diff_heights_null = AVLTree::new();
+        let mut avl_diff_heights_one = AVLTree::new();
+        let mut avl_diff_heights_two = AVLTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+        for value in &values_1 {
+            avl_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            avl_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            avl_diff_heights_two.insert(value);
+        }
+
+        assert_eq!(
+            avl_diff_heights_null.pre_order(),
+            vec![&&5, &&3, &&2, &&4, &&7, &&6, &&8]
+        );
+
+        assert_eq!(
+            avl_diff_heights_one.pre_order(),
+            vec![&&4, &&2, &&1, &&3, &&6, &&5]
+        );
+
+        assert_eq!(
+            avl_diff_heights_two.pre_order(),
+            vec![&&8, &&4, &&2, &&1, &&6, &&7, &&12, &&10]
+        );
+    }
+
+    #[test]
+    fn in_order_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.in_order(), Vec::<&i32>::new());
+    }
+
+    #[test]
+    fn in_order_basic() {
+        let mut avl_diff_heights_null = AVLTree::new();
+        let mut avl_diff_heights_one = AVLTree::new();
+        let mut avl_diff_heights_two = AVLTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+        for value in &values_1 {
+            avl_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            avl_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            avl_diff_heights_two.insert(value);
+        }
+
+        assert_eq!(
+            avl_diff_heights_null.in_order(),
+            vec![&&2, &&3, &&4, &&5, &&6, &&7, &&8]
+        );
+
+        assert_eq!(
+            avl_diff_heights_one.in_order(),
+            vec![&&1, &&2, &&3, &&4, &&5, &&6]
+        );
+
+        assert_eq!(
+            avl_diff_heights_two.in_order(),
+            vec![&&1, &&2, &&4, &&6, &&7, &&8, &&10, &&12]
+        );
+    }
+
+    #[test]
+    fn post_order_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.post_order(), Vec::<&i32>::new());
+    }
+
+    #[test]
+    fn post_order_basic() {
+        let mut avl_diff_heights_null = AVLTree::new();
+        let mut avl_diff_heights_one = AVLTree::new();
+        let mut avl_diff_heights_two = AVLTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+        for value in &values_1 {
+            avl_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            avl_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            avl_diff_heights_two.insert(value);
+        }
+
+        assert_eq!(
+            avl_diff_heights_null.post_order(),
+            vec![&&2, &&4, &&3, &&6, &&8, &&7, &&5]
+        );
+
+        assert_eq!(
+            avl_diff_heights_one.post_order(),
+            vec![&&1, &&3, &&2, &&5, &&6, &&4]
+        );
+
+        assert_eq!(
+            avl_diff_heights_two.post_order(),
+            vec![&&1, &&2, &&7, &&6, &&4, &&10, &&12, &&8]
+        );
+    }
+
+    #[test]
+    fn level_order_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.level_order(), Vec::<&i32>::new());
+    }
+
+    #[test]
+    fn level_order_basic() {
+        let mut avl_diff_heights_null = AVLTree::new();
+        let mut avl_diff_heights_one = AVLTree::new();
+        let mut avl_diff_heights_two = AVLTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+        for value in &values_1 {
+            avl_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            avl_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            avl_diff_heights_two.insert(value);
+        }
+
+        assert_eq!(
+            avl_diff_heights_null.level_order(),
+            vec![&&5, &&3, &&7, &&2, &&4, &&6, &&8]
+        );
+
+        assert_eq!(
+            avl_diff_heights_one.level_order(),
+            vec![&&4, &&2, &&6, &&1, &&3, &&5]
+        );
+
+        assert_eq!(
+            avl_diff_heights_two.level_order(),
+            vec![&&8, &&4, &&12, &&2, &&6, &&10, &&1, &&7]
+        );
+    }
+
+    #[test]
+    fn number_of_elements_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.number_of_elements(), 0);
+    }
+
+    #[test]
+    fn number_of_elements_basic() {
+        let mut avl_diff_heights_null = AVLTree::new();
+        let mut avl_diff_heights_one = AVLTree::new();
+        let mut avl_diff_heights_two = AVLTree::new();
+
+        let values_1 = vec![5, 3, 7, 2, 4, 6, 8];
+        let values_2 = vec![4, 2, 6, 1, 3, 5];
+        let values_3 = vec![8, 4, 12, 2, 6, 10, 1, 7];
+        for value in &values_1 {
+            avl_diff_heights_null.insert(value);
+        }
+        for value in &values_2 {
+            avl_diff_heights_one.insert(value);
+        }
+        for value in &values_3 {
+            avl_diff_heights_two.insert(value);
+        }
+
+        assert_eq!(avl_diff_heights_null.number_of_elements(), values_1.len());
+        assert_eq!(avl_diff_heights_one.number_of_elements(), values_2.len());
+        assert_eq!(avl_diff_heights_two.number_of_elements(), values_3.len());
+    }
+
+    #[test]
+    fn ceil_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.ceil(&0), None);
+    }
+
+    #[test]
+    fn ceil_basic() {
+        let mut avl = AVLTree::<i32>::new();
+
+        avl.insert(1);
+        avl.insert(2);
+        avl.insert(5);
+
+        assert_eq!(avl.ceil(&6), None);
+        assert_eq!(avl.ceil(&5), Some(&5));
+        assert_eq!(avl.ceil(&4), Some(&5));
+        assert_eq!(avl.ceil(&3), Some(&5));
+        assert_eq!(avl.ceil(&2), Some(&2));
+        assert_eq!(avl.ceil(&1), Some(&1));
+        assert_eq!(avl.ceil(&0), Some(&1));
+    }
+
+    #[test]
+    fn floor_in_empty_tree() {
+        let avl = AVLTree::<i32>::new();
+
+        assert_eq!(avl.floor(&0), None);
+    }
+
+    #[test]
+    fn floor_basic() {
+        let mut avl = AVLTree::<i32>::new();
+
+        avl.insert(1);
+        avl.insert(2);
+        avl.insert(5);
+
+        assert_eq!(avl.floor(&6), Some(&5));
+        assert_eq!(avl.floor(&5), Some(&5));
+        assert_eq!(avl.floor(&4), Some(&2));
+        assert_eq!(avl.floor(&3), Some(&2));
+        assert_eq!(avl.floor(&2), Some(&2));
+        assert_eq!(avl.floor(&1), Some(&1));
+        assert_eq!(avl.floor(&0), None);
     }
 }
