@@ -26,6 +26,6 @@ categories = [
 bst-rs = "0.1.0" # Generates data with which the outputs of the tested functions are compared in assertions (during prop testing).
 
 [dev-dependencies]
-proptest = "1.7.0"
+proptest = "1.8.0"
 rand = "0.9"
 
