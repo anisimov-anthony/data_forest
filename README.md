@@ -23,10 +23,10 @@ Build a modular Rust library implementing various tree data structures
 
 - Binary search tree
 - AVL tree
+- RB tree
 
 ###  📅 Planned:
 
-- RB tree
 - B tree
 - B+ tree
 - SLM tree
