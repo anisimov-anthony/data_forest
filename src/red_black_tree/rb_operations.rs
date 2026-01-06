@@ -91,7 +91,7 @@ impl<T: PartialOrd + Clone> RedBlackTree<T> {
 
         // Case 2: Left child and left-left grandchild are both red - rotate right
         if RBNode::is_red_node(&node.left)
-            && node.left.as_ref().map_or(false, |left| RBNode::is_red_node(&left.left)) {
+            && node.left.as_ref().is_some_and(|left| RBNode::is_red_node(&left.left)) {
             node = node.rotate_right();
         }
 
@@ -496,7 +496,7 @@ impl<T: PartialOrd + Clone> RedBlackTree<T> {
                 if node.left.is_some() {
                     // Ensure we can delete from left subtree
                     if !RBNode::is_red_node(&node.left)
-                        && node.left.as_ref().map_or(false, |left| !RBNode::is_red_node(&left.left)) {
+                        && node.left.as_ref().is_some_and(|left| !RBNode::is_red_node(&left.left)) {
                         node = Self::move_red_left(node);
                     }
                     node.left = Self::remove_recursive(node.left.take(), value);
@@ -516,7 +516,7 @@ impl<T: PartialOrd + Clone> RedBlackTree<T> {
                 if node.right.is_some() {
                     // Ensure we can delete from right subtree
                     if !RBNode::is_red_node(&node.right)
-                        && node.right.as_ref().map_or(false, |right| !RBNode::is_red_node(&right.left)) {
+                        && node.right.as_ref().is_some_and(|right| !RBNode::is_red_node(&right.left)) {
                         node = Self::move_red_right(node);
                     }
 
@@ -548,12 +548,10 @@ impl<T: PartialOrd + Clone> RedBlackTree<T> {
     fn remove_min(node: Option<Box<RBNode<T>>>) -> Option<Box<RBNode<T>>> {
         let mut node = node?;
 
-        if node.left.is_none() {
-            return None;
-        }
+        node.left.as_ref()?;
 
         if !RBNode::is_red_node(&node.left)
-            && node.left.as_ref().map_or(false, |left| !RBNode::is_red_node(&left.left)) {
+            && node.left.as_ref().is_some_and(|left| !RBNode::is_red_node(&left.left)) {
             node = Self::move_red_left(node);
         }
 
@@ -564,7 +562,7 @@ impl<T: PartialOrd + Clone> RedBlackTree<T> {
     /// Moves a red node to the left to prepare for deletion.
     fn move_red_left(mut node: Box<RBNode<T>>) -> Box<RBNode<T>> {
         node.flip_colors();
-        if node.right.as_ref().map_or(false, |right| RBNode::is_red_node(&right.left)) {
+        if node.right.as_ref().is_some_and(|right| RBNode::is_red_node(&right.left)) {
             if let Some(right) = node.right.take() {
                 node.right = Some(right.rotate_right());
             }
@@ -577,7 +575,7 @@ impl<T: PartialOrd + Clone> RedBlackTree<T> {
     /// Moves a red node to the right to prepare for deletion.
     fn move_red_right(mut node: Box<RBNode<T>>) -> Box<RBNode<T>> {
         node.flip_colors();
-        if node.left.as_ref().map_or(false, |left| RBNode::is_red_node(&left.left)) {
+        if node.left.as_ref().is_some_and(|left| RBNode::is_red_node(&left.left)) {
             node = node.rotate_right();
             node.flip_colors();
         }
@@ -591,7 +589,7 @@ impl<T: PartialOrd + Clone> RedBlackTree<T> {
         }
 
         if RBNode::is_red_node(&node.left)
-            && node.left.as_ref().map_or(false, |left| RBNode::is_red_node(&left.left)) {
+            && node.left.as_ref().is_some_and(|left| RBNode::is_red_node(&left.left)) {
             node = node.rotate_right();
         }
 

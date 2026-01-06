@@ -89,7 +89,7 @@ proptest! {
 
         let mut avl = AVLTree::new();
 
-        for (_, &value) in values.iter().enumerate() {
+        for &value in values.iter() {
             avl.insert(value);
         }
 
@@ -127,7 +127,7 @@ proptest! {
         for &v in &values {
             avl.insert(v);
             current_min = Some(v)
-                .filter(|&x| current_min.map_or(true, |min| x < min))
+                .filter(|&x| current_min.is_none_or(|min| x < min))
                 .or(current_min);
             assert_eq!(avl.min(), current_min.as_ref());
         }
@@ -147,7 +147,7 @@ proptest! {
         for &v in &values {
             avl.insert(v);
             current_max = Some(v)
-                .filter(|&x| current_max.map_or(true, |max| x > max))
+                .filter(|&x| current_max.is_none_or(|max| x > max))
                 .or(current_max);
             assert_eq!(avl.max(), current_max.as_ref());
         }

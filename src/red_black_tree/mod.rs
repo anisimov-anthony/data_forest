@@ -37,11 +37,10 @@ impl<T: PartialOrd + Clone> RedBlackTree<T> {
     /// Check if the tree maintains Red-Black properties.
     pub fn is_valid_red_black_tree(&self) -> bool {
         // Property 1: Root must be black
-        if let Some(root) = &self.root {
-            if root.is_red() {
+        if let Some(root) = &self.root
+            && root.is_red() {
                 return false;
             }
-        }
 
         // Check other properties recursively
         self.check_red_property(&self.root) && self.check_black_height(&self.root).is_some()
@@ -94,16 +93,14 @@ impl<T: PartialOrd + Clone> RedBlackTree<T> {
         ) -> bool {
             match node {
                 Some(node) => {
-                    if let Some(min_val) = min {
-                        if &node.value <= min_val {
+                    if let Some(min_val) = min
+                        && &node.value <= min_val {
                             return false;
                         }
-                    }
-                    if let Some(max_val) = max {
-                        if &node.value >= max_val {
+                    if let Some(max_val) = max
+                        && &node.value >= max_val {
                             return false;
                         }
-                    }
                     check(&node.left, min, Some(&node.value))
                         && check(&node.right, Some(&node.value), max)
                 }

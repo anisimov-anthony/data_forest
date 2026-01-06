@@ -62,7 +62,7 @@ proptest! {
         for &v in &values {
             bst.insert(v);
             current_min = Some(v)
-                .filter(|&x| current_min.map_or(true, |min| x < min))
+                .filter(|&x| current_min.is_none_or(|min| x < min))
                 .or(current_min);
             assert_eq!(bst.min(), current_min.as_ref());
         }
@@ -82,7 +82,7 @@ proptest! {
         for &v in &values {
             bst.insert(v);
             current_max = Some(v)
-                .filter(|&x| current_max.map_or(true, |max| x > max))
+                .filter(|&x| current_max.is_none_or(|max| x > max))
                 .or(current_max);
             assert_eq!(bst.max(), current_max.as_ref());
         }

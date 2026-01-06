@@ -577,14 +577,14 @@ mod tests {
     #[test]
     fn remove_from_single_node_tree_check_min_max_updating() {
         let mut bst = BinarySearchTree::new();
-        assert!(bst.max() == bst.min() && bst.max() == None);
+        assert!(bst.max() == bst.min() && bst.max().is_none());
 
         bst.insert(1);
         assert!(bst.max() == bst.min() && bst.max() == Some(&1));
         assert!(bst.contains(&1));
 
         bst.remove(&1);
-        assert!(bst.max() == bst.min() && bst.max() == None);
+        assert!(bst.max() == bst.min() && bst.max().is_none());
         assert!(!bst.contains(&1));
     }
 
@@ -718,7 +718,7 @@ mod tests {
         for value in &values_1 {
             bst_diff_heights_null.insert(*value);
             current_min_1 = Some(*value)
-                .filter(|&x| current_min_1.map_or(true, |min| x < min))
+                .filter(|&x| current_min_1.is_none_or(|min| x < min))
                 .or(current_min_1);
             assert_eq!(bst_diff_heights_null.min(), current_min_1.as_ref());
         }
@@ -726,7 +726,7 @@ mod tests {
         for value in &values_2 {
             bst_diff_heights_one.insert(*value);
             current_min_2 = Some(*value)
-                .filter(|&x| current_min_2.map_or(true, |min| x < min))
+                .filter(|&x| current_min_2.is_none_or(|min| x < min))
                 .or(current_min_2);
             assert_eq!(bst_diff_heights_one.min(), current_min_2.as_ref());
         }
@@ -734,7 +734,7 @@ mod tests {
         for value in &values_3 {
             bst_diff_heights_two.insert(*value);
             current_min_3 = Some(*value)
-                .filter(|&x| current_min_3.map_or(true, |min| x < min))
+                .filter(|&x| current_min_3.is_none_or(|min| x < min))
                 .or(current_min_3);
             assert_eq!(bst_diff_heights_two.min(), current_min_3.as_ref());
         }
@@ -779,7 +779,7 @@ mod tests {
         for value in &values_1 {
             bst_diff_heights_null.insert(*value);
             current_max_1 = Some(*value)
-                .filter(|&x| current_max_1.map_or(true, |max| x > max))
+                .filter(|&x| current_max_1.is_none_or(|max| x > max))
                 .or(current_max_1);
             assert_eq!(bst_diff_heights_null.max(), current_max_1.as_ref());
         }
@@ -787,7 +787,7 @@ mod tests {
         for value in &values_2 {
             bst_diff_heights_one.insert(*value);
             current_max_2 = Some(*value)
-                .filter(|&x| current_max_2.map_or(true, |max| x > max))
+                .filter(|&x| current_max_2.is_none_or(|max| x > max))
                 .or(current_max_2);
             assert_eq!(bst_diff_heights_one.max(), current_max_2.as_ref());
         }
@@ -795,7 +795,7 @@ mod tests {
         for value in &values_3 {
             bst_diff_heights_two.insert(*value);
             current_max_3 = Some(*value)
-                .filter(|&x| current_max_3.map_or(true, |max| x > max))
+                .filter(|&x| current_max_3.is_none_or(|max| x > max))
                 .or(current_max_3);
             assert_eq!(bst_diff_heights_two.max(), current_max_3.as_ref());
         }

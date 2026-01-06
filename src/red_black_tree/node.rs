@@ -59,7 +59,7 @@ impl<T: PartialOrd> RBNode<T> {
 
     /// Checks if a node option is red (None is considered black).
     pub fn is_red_node(node: &Option<Box<Self>>) -> bool {
-        node.as_ref().map_or(false, |n| n.is_red())
+        node.as_ref().is_some_and(|n| n.is_red())
     }
 
     /// Performs a left rotation around this node.

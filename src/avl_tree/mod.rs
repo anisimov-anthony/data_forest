@@ -52,16 +52,14 @@ impl<T: PartialOrd + Clone> AVLTree<T> {
         ) -> bool {
             match node {
                 Some(node) => {
-                    if let Some(min_val) = min {
-                        if &node.value <= min_val {
+                    if let Some(min_val) = min
+                        && &node.value <= min_val {
                             return false;
                         }
-                    }
-                    if let Some(max_val) = max {
-                        if &node.value >= max_val {
+                    if let Some(max_val) = max
+                        && &node.value >= max_val {
                             return false;
                         }
-                    }
                     check(&node.left, min, Some(&node.value))
                         && check(&node.right, Some(&node.value), max)
                 }
